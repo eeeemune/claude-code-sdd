@@ -24,9 +24,5 @@
       "\ud83e\udd0d"
     ],
     "page_icon": "\ud83d\udc9a"
-  },
-  "grounding": {
-    "aws_profile": "readonly",
-    "kube_context": "readonly"
   }
 }

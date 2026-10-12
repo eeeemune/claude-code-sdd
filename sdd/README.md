@@ -31,8 +31,7 @@ claude plugin install sdd@claude-code-sdd
 - **Links you give it:** read with the connectors your session already has, such as Notion, Slack or Asana. Nothing is written to them, apart from Notion as described next.
 - **Notion, only when your settings name a database:** creates and updates the SDD's page in that database, and reads and replies to comments on it, through your own Notion connection.
 - **claude.ai review page, with `/sdd:review`:** publishes the SDD's text and Claude's notes as a private page in your claude.ai account, and reads the verdicts, suggested edits and comments saved on it. The page's Ask box sends one part of the SDD and your question to Claude. Only you, and people you share the page with, can open it. The page loads its fonts from Google Fonts.
-- **Cloud reads, only when your settings name `grounding` values:** read-only `aws` and `kubectl` commands with that profile and context, to describe what runs today in an SDD of an existing system.
-- **Nothing else:** no telemetry, and no other network calls.
+- **Nothing else:** no cloud CLIs such as `aws` or `kubectl`, no telemetry, and no other network calls.
 
 ## Settings
 

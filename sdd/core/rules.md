@@ -7,7 +7,6 @@
 - **Settings:** `S settings` prints the user's settings merged with the defaults. They come from `sdd/settings.json` in the Claude config folder (`$CLAUDE_CONFIG_DIR`, or `~/.claude` when it is not set), so each Claude account has its own. Run it once per session. Every key is optional:
   - `organization`: the organization `S new` puts in the title block.
   - `notion`: where pages go and how they look. `notion_enabled` is true only when it names a `data_source_id`; otherwise Notion sync is off and every Notion step is skipped.
-  - `grounding`: a read-only `aws_profile` and `kube_context` for grounding views in what runs today. Empty means no cloud reads.
   - `warnings` lists keys the helper ignores, and exit code 1 with an `error` means the file is broken. Say either once, in one line, and carry on (a broken file means Notion is off).
 - **Template:** `core/template.md`, the jam01 SDD template (commit 5dca2e5, CC0) plus front matter, section 1.6 Requirements and the record formats for Sections 3 and 4.
 - **Worked example:** `tests/fixtures/full.md`.
@@ -18,7 +17,7 @@
   - Notion on in the settings but no Notion tools in this session: say once that this session cannot sync, set `notion_pending=true` after each write, and carry on. The next session with Notion catches up.
 - **Notion comments:** every reply Claude posts starts with `[sdd]`, so a later review can tell answered threads apart. Never resolve or delete a comment; the person who wrote it resolves it.
 - **Tags:** when Notion is on and `notion.tags` lists the database's options, pick only from that list. Otherwise suggest 2 to 4 short tags that fit the design.
-- **Grounding:** only with the `grounding` values from the settings, and only read-only commands, for example `kubectl --context <kube_context> get ...` or `AWS_PROFILE=<aws_profile> aws <service> describe-...`. Never a write profile. Without grounding values, take what runs today from the repo or ask the user.
+- **What runs today:** for an existing system, take it from the repo (Helm charts, Terraform, Kubernetes manifests, CI and deploy configuration) or ask the user. The plugin never runs cloud CLIs such as `aws` or `kubectl`.
 
 ## Files
 

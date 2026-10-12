@@ -47,7 +47,7 @@ Then start a new Claude Code session (or run `/reload-plugins` in an open one).
 
 ## What it runs and sends
 
-The commands run a local Python helper (standard library only, no network calls) and write the SDD to `docs/sdd/` or `~/sdd/`. Notion is written to only when your settings name a database, through your own Notion connection. `/sdd:review` publishes the SDD's text and Claude's notes as a private page in your claude.ai account. Cloud reads happen only when your settings name a read-only AWS profile or kube context. There is no telemetry. The full list is in [sdd/README.md](sdd/README.md#what-it-runs-and-sends).
+The commands run a local Python helper (standard library only, no network calls) and write the SDD to `docs/sdd/` or `~/sdd/`. Notion is written to only when your settings name a database, through your own Notion connection. `/sdd:review` publishes the SDD's text and Claude's notes as a private page in your claude.ai account. It never runs cloud CLIs such as `aws` or `kubectl`, and there is no telemetry. The full list is in [sdd/README.md](sdd/README.md#what-it-runs-and-sends).
 
 ## Settings (optional)
 
@@ -78,7 +78,6 @@ To sync to Notion, connect Notion in Claude Code (the claude.ai Notion connector
 | `notion.fixed_properties` | none | Properties set on every page, for example `{"Category": "Document"}` |
 | `notion.heading_marks` | none | Three marks put in front of level 1, 2 and 3 headings on the page |
 | `notion.page_icon` | none | The page icon |
-| `grounding.aws_profile`, `grounding.kube_context` | none | A read-only AWS profile and kube context Claude may use to ground views of existing systems in what runs today |
 
 Run `python3 <plugin folder>/scripts/sdd.py settings` (Claude does this at the start of each command) to see the merged settings, warnings for unknown keys, and the line of any JSON error.
 

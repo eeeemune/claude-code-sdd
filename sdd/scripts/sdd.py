@@ -1300,7 +1300,6 @@ SETTINGS_DEFAULTS = {
         "heading_marks": [],
         "page_icon": "",
     },
-    "grounding": {"aws_profile": "", "kube_context": ""},
 }
 _TYPE_NAMES = {str: "a string", list: "a list of strings", dict: "an object of strings"}
 

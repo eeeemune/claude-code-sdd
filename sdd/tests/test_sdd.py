@@ -423,7 +423,7 @@ class SettingsTests(unittest.TestCase):
         self.assertFalse(s["notion_enabled"])
         self.assertEqual(s["organization"], "")
         self.assertEqual(s["notion"]["heading_marks"], [])
-        self.assertEqual(s["grounding"], {"aws_profile": "", "kube_context": ""})
+        self.assertNotIn("grounding", s)  # the plugin never reads cloud credentials (ADR-010)
         self.assertEqual((s["warnings"], s["error"]), ([], None))
 
     def test_file_merges_with_defaults(self):
@@ -444,6 +444,12 @@ class SettingsTests(unittest.TestCase):
         self.assertIn("organisation", s["warnings"][0])
         self.assertIn("notion.data_source", s["warnings"][1])
         self.assertFalse(s["notion_enabled"])
+
+    def test_old_grounding_block_is_ignored_with_a_warning(self):
+        s = sdd().load_settings(config_with('{"grounding": {"aws_profile": "readonly"}, "organization": "Acme"}'))
+        self.assertEqual(s["warnings"], ["unknown key 'grounding' is ignored"])
+        self.assertEqual(s["organization"], "Acme")
+        self.assertNotIn("grounding", s)
 
     def test_invalid_json_names_the_line_and_turns_notion_off(self):
         s = sdd().load_settings(config_with('{\n  "organization": "Acme"\n  "notion": {}\n}\n'))  # missing comma

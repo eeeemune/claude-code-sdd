@@ -1,10 +1,21 @@
 {
   "name": "sdd",
-  "version": "1.0.0",
+  "displayName": "Software Design Descriptions",
+  "version": "1.1.0",
   "description": "Guided Software Design Descriptions for spec-driven development: write one section at a time, review on a claude.ai page, publish with optional Notion sync",
-  "author": { "name": "Lim Eunhye", "url": "https://github.com/eeeemune" },
+  "author": {
+    "name": "Lim Eunhye",
+    "url": "https://github.com/eeeemune"
+  },
   "homepage": "https://github.com/eeeemune/claude-code-sdd",
   "repository": "https://github.com/eeeemune/claude-code-sdd",
   "license": "MIT",
-  "keywords": ["sdd", "software-design", "design-doc", "spec-driven-development", "ieee-1016", "adr"]
+  "keywords": [
+    "sdd",
+    "software-design",
+    "design-doc",
+    "spec-driven-development",
+    "ieee-1016",
+    "adr"
+  ]
 }

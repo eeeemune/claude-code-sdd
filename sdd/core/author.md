@@ -35,7 +35,7 @@ You are guiding someone who is new to Software Design Descriptions through one S
 - The description and links: fetch Notion pages; read Slack threads and Asana tasks when those tools are connected.
 - Inside a git repo: README files, the top-level layout, manifests (`package.json`, `pyproject.toml`, `go.mod`), `Dockerfile`, Helm, Kubernetes and Terraform folders, `.github/workflows`. For a large repo (more than about 200 files), spawn an Explore subagent at medium breadth: "Summarize this repo's architecture in 10 bullets: services, entry points, data stores, deploy targets, CI."
 - Existing specs and decisions (`specs/`, `docs/adr/`, `docs/decisions/`, `docs/srs*`): link them in 1.4, and cite their requirement IDs in 1.6 instead of creating new ones.
-- Kind existing or change: ground the Deployment and Physical views in what runs today, following the grounding rule in `rules.md`, for example `kubectl --context <kube_context> get deploy,svc,ingress,cronjob -n <namespace>`. Only when the namespace or resource is known; never a write profile.
+- Kind existing or change: ground the Deployment and Physical views in what runs today, following the "What runs today" rule in `rules.md`: the repo's deploy configuration, or what the user tells you.
 
 Keep a private brief of at most 10 bullets in the conversation. It never goes into the SDD.
 
