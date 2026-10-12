@@ -8,7 +8,7 @@ The SDD is a plain markdown file in your repo (`docs/sdd/<slug>.md`, or `~/sdd/<
 
 This plugin was designed with itself. Below is the review page (`/sdd:review`) for the SDD of this public release, written with `/sdd:write`, right after Claude acted on the first round of feedback: green parts are approved, and blue parts were changed by Claude and wait for a re-check, each with a line saying what changed. The second round approved all 25 parts. Each part has plain-language notes, a walk through its diagram, a "Check yourself" question, an Ask box, and Approve or Needs changes. Selecting words in the SDD text lets you comment on them or suggest an edit.
 
-![The review page for this plugin's own release SDD after the first round of fixes: 13 parts approved, 12 waiting for a re-check](docs/review-page-recheck.png)
+![The review page for this plugin's own release SDD after the first round of fixes: 13 parts approved, 12 waiting for a re-check](sdd/docs/review-page-recheck.png)
 
 A writing turn (`/sdd:write`) starts with a card like this one, then a question with two or three drafts of the section, each previewed as the exact markdown it will write:
 
@@ -44,6 +44,10 @@ Then start a new Claude Code session (or run `/reload-plugins` in an open one).
 | Review page (the default) | `/sdd:review` publishes a private claude.ai page: one card per part with plain-language notes, a diagram walk-through, Claude's check of the part, a "Check yourself" question, an Ask box, and Approve or Needs changes. An "Original document" tab shows the SDD as written. Select words to comment or suggest an edit. Run `/sdd:review` again and Claude fixes the flagged parts, applies or declines each suggested edit, marks changed parts "Re-check" and republishes. Share the page with teammates and they can leave verdicts too. | Claude Code's claude.ai Artifact tools. Without them, `/sdd:review` says so and points to `walk`. |
 | Terminal | `/sdd:review walk` walks the sections one per turn: what each says, how it links to the rest, what is wrong, and fixes you can apply. | Nothing extra. |
 | Notion | Every section, view and decision is a closed toggle with an "About this section" note. Comment on any line, then run `/sdd:review notion`: Claude changes the file, re-syncs and replies in each thread. | Notion sync turned on. |
+
+## What it runs and sends
+
+The commands run a local Python helper (standard library only, no network calls) and write the SDD to `docs/sdd/` or `~/sdd/`. Notion is written to only when your settings name a database, through your own Notion connection. `/sdd:review` publishes the SDD's text and Claude's notes as a private page in your claude.ai account. Cloud reads happen only when your settings name a read-only AWS profile or kube context. There is no telemetry. The full list is in [sdd/README.md](sdd/README.md#what-it-runs-and-sends).
 
 ## Settings (optional)
 
