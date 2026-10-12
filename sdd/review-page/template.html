@@ -1,0 +1,804 @@
+<title>__SDD_TITLE__ review</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<style>
+/* Layout: a sticky index of the document's parts on the left, one review column on the right; one column below 900px. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --ink: #1a2030;
+  --muted: #586274;
+  --rule: #d8dde6;
+  --accent: #2c56a0;
+  --about-bg: #edf0f6;
+  --code-bg: #eceff4;
+  --diagram-bg: #ffffff;
+  --ok: #1d7448;
+  --ok-bg: #e2f2e8;
+  --warn: #8f5500;
+  --warn-bg: #fbeed6;
+  --info: #2c56a0;
+  --info-bg: #e4ebf7;
+  --todo-bg: #fbf1d3;
+  --del: #a3352a;
+  --del-bg: #fbe7e4;
+  --ins: #1d7448;
+  --ins-bg: #e2f2e8;
+  --hl-bg: #fde7a9;
+  --shadow: rgba(16, 20, 27, 0.18);
+  --backdrop: rgba(16, 20, 27, 0.35);
+  --font-display: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10141b; --surface: #161b24; --ink: #e4e8ef; --muted: #98a2b4; --rule: #29313f;
+    --accent: #8db0f0; --about-bg: #1c2330; --code-bg: #1d2431;
+    --ok: #74d29f; --ok-bg: #16331f; --warn: #f0b85f; --warn-bg: #382a12;
+    --info: #8db0f0; --info-bg: #1b2a44; --todo-bg: #352c12;
+    --del: #f0a49a; --del-bg: #3a1d1a; --ins: #74d29f; --ins-bg: #16331f; --hl-bg: #5c4813;
+    --shadow: rgba(0, 0, 0, 0.5); --backdrop: rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10141b; --surface: #161b24; --ink: #e4e8ef; --muted: #98a2b4; --rule: #29313f;
+  --accent: #8db0f0; --about-bg: #1c2330; --code-bg: #1d2431;
+  --ok: #74d29f; --ok-bg: #16331f; --warn: #f0b85f; --warn-bg: #382a12;
+  --info: #8db0f0; --info-bg: #1b2a44; --todo-bg: #352c12;
+  --del: #f0a49a; --del-bg: #3a1d1a; --ins: #74d29f; --ins-bg: #16331f; --hl-bg: #5c4813;
+  --shadow: rgba(0, 0, 0, 0.5); --backdrop: rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--font-body); }
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+
+.page { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 64px; }
+.top { display: grid; gap: 10px; padding-bottom: 22px; border-bottom: 1px solid var(--rule); }
+.meta { margin: 0; color: var(--muted); font-size: 13px; letter-spacing: 0.02em; }
+h1 { margin: 0; font: 600 clamp(26px, 4vw, 34px)/1.2 var(--font-display); text-wrap: balance; }
+.lede { margin: 0; max-width: 65ch; color: var(--muted); }
+.progress { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.bar { flex: 1 1 220px; max-width: 420px; height: 6px; background: var(--rule); border-radius: 3px; overflow: hidden; }
+.bar span { display: block; height: 100%; width: 0; background: var(--ok); transition: width 0.3s; }
+#progress-text { font-variant-numeric: tabular-nums; font-size: 14px; }
+.notice { margin: 0; padding: 10px 12px; background: var(--warn-bg); color: var(--warn); border-radius: 6px; max-width: 65ch; }
+
+.layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 40px; padding-top: 26px; }
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); align-self: start; max-height: calc(100vh - 32px); overflow-y: auto; }
+.toc p { margin: 0 0 8px; font: 500 12px/1.4 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.toc-link { display: grid; grid-template-columns: 74px 52px minmax(0, 1fr); align-items: baseline; gap: 8px; padding: 5px 6px; border-radius: 6px; color: var(--ink); text-decoration: none; font-size: 13px; }
+.toc-link:hover, .toc-link[aria-current="true"] { background: var(--about-bg); }
+.toc-id { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.toc-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.chip { justify-self: start; font: 500 11px/1.6 var(--font-body); padding: 0 7px; border-radius: 999px; border: 1px solid var(--rule); color: var(--muted); white-space: nowrap; }
+.chip[data-state="approved"] { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
+.chip[data-state="changes"] { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+.chip[data-state="changed"] { background: var(--info-bg); color: var(--info); border-color: transparent; }
+
+main { min-width: 0; display: grid; gap: 0; }
+.entry { min-width: 0; padding-block: 28px 32px; border-bottom: 1px solid var(--rule); display: grid; gap: 16px; scroll-margin-top: 16px; }
+.entry:first-child { padding-top: 0; }
+.eyebrow { margin: 0; font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.eyebrow .id { color: var(--accent); }
+.eyebrow .dot { padding-inline: 2px; }
+.entry h2 { margin: 0; font: 600 23px/1.3 var(--font-display); text-wrap: balance; }
+.about { background: var(--about-bg); border-radius: 8px; padding: 10px 14px; max-width: 72ch; }
+.about p { margin: 0; font-size: 14px; }
+.notes { display: grid; gap: 8px; max-width: 72ch; }
+.notes p { margin: 0; }
+.label { display: inline-block; margin-right: 6px; font: 600 11px/1.4 var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.tour ol { margin: 4px 0 0; padding-left: 22px; display: grid; gap: 2px; }
+.content, .doc-body, .doc-text { min-width: 0; max-width: 72ch; overflow-wrap: anywhere; }
+.content > :first-child, .doc-body > :first-child { margin-top: 0; }
+.content p, .content ul, .content ol, .doc-body p, .doc-body ul, .doc-body ol, .doc-text p { margin: 0 0 10px; }
+.content ul, .content ol, .doc-body ul, .doc-body ol { padding-left: 22px; }
+.content h3 { margin: 18px 0 6px; font: 600 16px/1.4 var(--font-body); }
+.content .todo, .doc-body .todo { background: var(--todo-bg); padding: 8px 12px; border-radius: 6px; }
+.content .empty, .empty { color: var(--muted); font-style: italic; }
+.content blockquote, .doc-body blockquote { margin: 0 0 10px; padding-left: 12px; border-left: 3px solid var(--rule); color: var(--muted); }
+.table-wrap { overflow-x: auto; margin: 0 0 10px; }
+table { border-collapse: collapse; font-size: 14px; min-width: 100%; }
+th, td { text-align: left; vertical-align: top; padding: 7px 10px; border-bottom: 1px solid var(--rule); overflow-wrap: break-word; }
+th { font-weight: 600; font-size: 13px; color: var(--muted); }
+pre { margin: 0 0 10px; overflow-x: auto; padding: 12px 14px; border-radius: 8px; background: var(--code-bg); font: 13px/1.5 var(--font-mono); }
+pre code { background: none; padding: 0; }
+pre.mermaid { background: var(--diagram-bg); color: #1a2030; border: 1px solid var(--rule); text-align: center; }
+.findings { background: var(--warn-bg); border-radius: 8px; padding: 10px 14px; max-width: 72ch; }
+.findings .label { margin: 0 0 4px; }
+.findings ul { margin: 0; padding-left: 18px; font-size: 14px; }
+.findings.claude { background: var(--info-bg); }
+.sev { font: 600 11px/1.4 var(--font-mono); text-transform: uppercase; color: var(--warn); }
+.rule { color: var(--muted); font-size: 12px; font-family: var(--font-mono); }
+.check { max-width: 72ch; border: 1px solid var(--rule); border-radius: 8px; padding: 8px 12px; }
+.check summary { cursor: pointer; font-weight: 500; }
+.check p { margin: 8px 0 0; }
+
+.ask { display: grid; gap: 6px; max-width: 72ch; }
+.ask label, .note-row label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.ask-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+.ask-row textarea { flex: 1 1 260px; min-width: 0; }
+.ask-buttons { display: flex; gap: 8px; }
+.answer:empty { display: none; }
+.answer { white-space: pre-wrap; background: var(--about-bg); border-radius: 8px; padding: 10px 14px; font-size: 14px; }
+textarea { font: inherit; font-size: 14px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 7px 9px; width: 100%; resize: vertical; }
+
+.verdict { display: grid; gap: 10px; padding: 14px; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; max-width: 72ch; }
+.verdict-row, .note-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.note-row { display: grid; gap: 6px; }
+.btn { font: 500 14px/1 var(--font-body); padding: 9px 14px; border-radius: 7px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); cursor: pointer; }
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn.approve { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
+.btn.changes { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+.btn.quiet { background: transparent; }
+.verdict-status { margin: 0; font-size: 13px; color: var(--muted); }
+.verdict-status:empty { display: none; }
+.entry[data-state="approved"] .verdict { border-color: var(--ok); }
+.entry[data-state="changes"] .verdict { border-color: var(--warn); }
+.entry[data-state="changed"] .verdict { border-color: var(--info); }
+.next { font-size: 14px; }
+.next.done { margin: 0; color: var(--muted); }
+
+.trace { padding-top: 30px; display: grid; gap: 10px; }
+.trace h2 { margin: 0; font: 600 20px/1.3 var(--font-display); }
+.trace p { margin: 0; color: var(--muted); max-width: 65ch; }
+.foot { margin: 28px 0 0; color: var(--muted); font-size: 13px; }
+
+.toolbar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; }
+.toolbar-row .progress { flex: 1 1 260px; }
+.views { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--rule); border-radius: 9px; background: var(--surface); }
+.view-btn { font: 500 14px/1 var(--font-body); padding: 8px 12px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; }
+.view-btn[aria-pressed="true"] { background: var(--about-bg); color: var(--ink); }
+.guided { display: grid; min-width: 0; }
+
+.sdd-label { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; max-width: 72ch; font-size: 13px; }
+.sdd-label .label { margin: 0; }
+.sel-hint { color: var(--muted); }
+.to-original { margin-left: auto; }
+
+.doc { min-width: 0; display: grid; gap: 14px; }
+.doc-title { margin: 0; font: 600 28px/1.25 var(--font-display); text-wrap: balance; }
+.doc-subtitle { margin: -8px 0 0; font: 500 18px/1.4 var(--font-display); color: var(--muted); }
+.doc-chapter { margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--rule); font: 600 21px/1.3 var(--font-display); }
+.doc-part { min-width: 0; display: grid; gap: 8px; scroll-margin-top: 16px; }
+.doc-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+.doc-h { margin: 0; font: 600 17px/1.35 var(--font-body); }
+h3.doc-h { font: 600 21px/1.3 var(--font-display); }
+.doc-review, .sg-count { font-size: 13px; }
+.doc-body h4, .doc-body h5 { margin: 14px 0 4px; font: 600 15px/1.4 var(--font-body); }
+
+.selbar { position: absolute; z-index: 20; display: flex; gap: 6px; padding: 5px; background: var(--surface); border: 1px solid var(--rule); border-radius: 9px; box-shadow: 0 6px 20px var(--shadow); }
+.selbar .btn { padding: 7px 11px; font-size: 13px; touch-action: manipulation; }
+.btn.small { padding: 5px 9px; font-size: 12px; }
+
+.suggest { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); color: var(--ink); box-shadow: 0 18px 50px var(--shadow); }
+.suggest::backdrop { background: var(--backdrop); }
+.suggest form { display: grid; gap: 8px; padding: 18px 20px; }
+.suggest h2 { margin: 0; font: 600 19px/1.3 var(--font-display); }
+.suggest label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.sg-where, .sg-tip { margin: 0; font-size: 13px; color: var(--muted); }
+.sg-quote { margin: 0; padding: 8px 12px; max-height: 160px; overflow: auto; border-radius: 6px; background: var(--del-bg); color: var(--del); white-space: pre-wrap; text-decoration: line-through; }
+.sg-error { margin: 0; font-size: 13px; color: var(--warn); }
+.sg-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+
+.suggestions { display: grid; gap: 8px; max-width: 72ch; }
+.suggestions .label { margin: 0; }
+.suggestions ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sg { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); }
+.sg-diff { display: grid; gap: 4px; font-size: 14px; }
+.sg-diff del, .sg-diff ins { padding: 2px 6px; border-radius: 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.sg-diff del { background: var(--del-bg); color: var(--del); }
+.sg-diff ins { background: var(--ins-bg); color: var(--ins); text-decoration: none; }
+.sg-diff .delete-note { color: var(--muted); font-style: italic; font-size: 13px; }
+.sg-why, .sg-answer { margin: 0; font-size: 13px; }
+.sg-meta { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12px; color: var(--muted); }
+::highlight(sdd-suggest) { background-color: var(--hl-bg); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .toc { position: static; max-height: 40vh; border: 1px solid var(--rule); border-radius: 10px; padding: 10px; }
+}
+</style>
+
+<div class="page">
+  <header class="top">
+    <p class="meta">__SDD_META__</p>
+    <h1>__SDD_TITLE__</h1>
+    <p class="lede">Read each part, then approve it or say what should change. Select words in the SDD text to comment on them or suggest an edit. Everything saves here as you go, and Claude reads it when you run /sdd:review in Claude Code.</p>
+    <div class="toolbar-row">
+      <div class="views" role="group" aria-label="Show">
+        <button type="button" class="view-btn" data-action="view" data-view="guided" aria-pressed="true">Guided review</button>
+        <button type="button" class="view-btn" data-action="view" data-view="original" aria-pressed="false">Original document</button>
+      </div>
+      <div class="progress"><div class="bar"><span id="bar-fill"></span></div><span id="progress-text">0 of __SDD_TOTAL__ reviewed</span></div>
+    </div>
+    <p id="notice" class="notice" hidden></p>
+  </header>
+  <div class="layout">
+    <nav class="toc" aria-label="Parts of the document">
+      <p>Parts</p>
+      <ol>
+<!--SDD:NAV-->
+      </ol>
+    </nav>
+    <main>
+      <div id="guided" class="guided">
+<!--SDD:SECTIONS-->
+      <section class="trace" aria-labelledby="trace-title">
+        <h2 id="trace-title">Requirements and where they are built</h2>
+        <p>Every requirement in 1.6 should be built by at least one view. "Shaped by" lists the decisions those views cite.</p>
+<!--SDD:TRACE-->
+        <p class="foot">The markdown file is the source of truth and the Notion page is its copy. This page is for one review pass.</p>
+      </section>
+      </div>
+      <article id="original" class="doc" hidden aria-label="Original document">
+<!--SDD:ORIGINAL-->
+      </article>
+    </main>
+  </div>
+</div>
+
+<div id="selbar" class="selbar" role="toolbar" aria-label="Selected text" hidden>
+  <button type="button" class="btn" data-action="sel-comment" hidden>Comment</button>
+  <button type="button" class="btn changes" data-action="sel-suggest" hidden>Suggest edit</button>
+</div>
+
+<dialog id="suggest" class="suggest" aria-labelledby="sg-title">
+  <form id="sg-form">
+    <h2 id="sg-title">Suggest an edit</h2>
+    <p class="sg-where" id="sg-where"></p>
+    <p class="label">Current text</p>
+    <p class="sg-quote" id="sg-quote"></p>
+    <label for="sg-new">Replace with</label>
+    <textarea id="sg-new" rows="4"></textarea>
+    <p class="sg-tip">Leave it empty to suggest deleting the text.</p>
+    <label for="sg-why">Why (optional)</label>
+    <textarea id="sg-why" rows="2"></textarea>
+    <p class="sg-error" id="sg-error" hidden></p>
+    <div class="sg-actions">
+      <button type="button" class="btn quiet" data-action="sg-cancel">Cancel</button>
+      <button type="submit" class="btn changes" id="sg-save">Save suggestion</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="application/json" id="sdd-data">__SDD_DATA__</script>
+<script>
+(function () {
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("sdd-data").textContent);
+  var ids = DATA.entries.map(function (e) { return e.id; });
+  var byId = {};
+  DATA.entries.forEach(function (e) { byId[e.id] = e; });
+  var LABEL = { open: "Open", approved: "Approved", changes: "Changes", changed: "Re-check" };
+  var SG_LABEL = { open: "Open", applied: "Applied", declined: "Declined" };
+  var SG_CHIP = { open: "changes", applied: "approved", declined: "declined" };
+  var LOCKING = ["invalid_argument", "transform_error", "revoked", "not_granted", "capability_disabled", "capability_removed"];
+  var verdicts = {}, suggestions = {};
+  var db = null, user = null, sample = null, comments = null, myId = null, canWrite = true;
+  var busy = {}, controllers = {};
+  var view = "guided", currentKey = null, selState = null, draft = null, selTimer = null, barPress = false;
+  var notice = document.getElementById("notice");
+  var guided = document.getElementById("guided");
+  var original = document.getElementById("original");
+  var selbar = document.getElementById("selbar");
+  var dialog = document.getElementById("suggest");
+  var sgForm = document.getElementById("sg-form");
+  var sgNew = document.getElementById("sg-new");
+  var sgWhy = document.getElementById("sg-why");
+  var sgQuote = document.getElementById("sg-quote");
+  var sgWhere = document.getElementById("sg-where");
+  var sgError = document.getElementById("sg-error");
+  var sgSave = document.getElementById("sg-save");
+
+  function slug(id) { return id.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase(); }
+  function anchorId(id) { return "s-" + slug(id); }
+  function section(id) { return document.getElementById(anchorId(id)); }
+  function setNotice(text) { notice.textContent = text || ""; notice.hidden = !text; }
+  function each(selector, fn) { Array.prototype.forEach.call(document.querySelectorAll(selector), fn); }
+  function node(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function canSuggest() { return !!db && canWrite; }
+
+  function when(iso) {
+    try { return new Date(iso).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }); } catch (e) { return ""; }
+  }
+  function who(v, people) {
+    var p = v.by && people[v.by];
+    if (p && p.isMe) return "you";
+    return (p && p.name) || "someone";
+  }
+  function sentence(s) {
+    s = String(s || "").trim();
+    return s && !/[.!?]$/.test(s) ? s + "." : s;
+  }
+  function describe(v, people) {
+    if (!v) return "";
+    if (v.status === "approved") return "Approved by " + who(v, people) + ", " + when(v.at) + ".";
+    if (v.status === "changes") return "Needs changes (" + who(v, people) + ", " + when(v.at) + "): " + sentence(v.note || "no note") + (v.reply ? " Claude replied: " + sentence(v.reply) : "");
+    if (v.status === "changed") return "Claude changed this" + (v.note ? " after the note \"" + v.note + "\"" : "") + ": " + sentence(v.fix || "see the text above") + " Re-check it, then approve.";
+    return "";
+  }
+
+  // Saving: one retry on a transient failure; access and lifecycle failures lock every save control.
+  function pause(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
+  async function retryOnce(fn) {
+    try { return await fn(); }
+    catch (e) {
+      if (!e || e.code !== "unavailable") throw e;
+      await pause(300 + Math.random() * 500);
+      return fn();
+    }
+  }
+  function saveFailed(e, what) {
+    var code = e && e.code;
+    if (LOCKING.indexOf(code) >= 0) {
+      canWrite = false;
+      lockSaving("You can read this review, but this view cannot save verdicts or suggested edits.");
+      return "";
+    }
+    if (code === "quota_exceeded") return "This page is full and cannot save more " + what + ".";
+    if (code === "resource_exhausted") return "Too many saves at once. Wait a moment, then try again.";
+    return "That did not save. Try again in a moment.";
+  }
+
+  // Finds a suggestion's quote in a block of SDD text, ignoring whitespace (selections across table
+  // cells or lines carry tabs and newlines that the page text does not). The before and after text
+  // pick the right copy when the quote appears more than once.
+  function squeeze(s) { return String(s || "").replace(/\s+/g, ""); }
+  function locateQuote(scope, s) {
+    var q = squeeze(s.quote);
+    if (!q) return null;
+    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+    var map = [], flat = "";
+    for (var t = walker.nextNode(); t; t = walker.nextNode()) {
+      var v = t.nodeValue;
+      for (var i = 0; i < v.length; i++) {
+        var c = v.charAt(i);
+        if (!/\s/.test(c)) { map.push(t, i); flat += c; }
+      }
+    }
+    var before = squeeze(s.before), after = squeeze(s.after);
+    var at = flat.indexOf(before + q + after);
+    at = at >= 0 ? at + before.length : flat.indexOf(q);
+    if (at < 0) return null;
+    var last = at + q.length - 1;
+    var r = document.createRange();
+    r.setStart(map[at * 2], map[at * 2 + 1]);
+    r.setEnd(map[last * 2], map[last * 2 + 1] + 1);
+    return r;
+  }
+  function paintHighlights() {
+    if (!(window.CSS && CSS.highlights && typeof Highlight === "function")) return;
+    var h = new Highlight();
+    Object.keys(suggestions).forEach(function (k) {
+      var s = suggestions[k];
+      if (!s || s.status !== "open" || !byId[s.entry]) return;
+      each('[data-sel="' + CSS.escape(s.entry) + '"]', function (scope) {
+        var r = locateQuote(scope, s);
+        if (r) h.add(r);
+      });
+    });
+    CSS.highlights.set("sdd-suggest", h);
+  }
+
+  function suggestionItem(docId, s, people) {
+    var status = SG_LABEL[s.status] ? s.status : "open";
+    var li = node("li", "sg");
+    li.dataset.status = status;
+    var diff = node("div", "sg-diff");
+    diff.appendChild(node("del", null, s.quote || ""));
+    diff.appendChild(s.replacement ? node("ins", null, s.replacement) : node("span", "delete-note", "Delete this text."));
+    li.appendChild(diff);
+    if (s.note) li.appendChild(node("p", "sg-why", "Why: " + s.note));
+    var meta = node("p", "sg-meta");
+    var chip = node("span", "chip", SG_LABEL[status]);
+    chip.dataset.state = SG_CHIP[status];
+    meta.appendChild(chip);
+    meta.appendChild(node("span", null, who(s, people) + (s.at ? ", " + when(s.at) : "")));
+    if (status === "open" && myId && s.by === myId && canSuggest()) {
+      var b = node("button", "btn quiet small", "Withdraw");
+      b.type = "button";
+      b.dataset.action = "withdraw";
+      b.dataset.doc = docId;
+      meta.appendChild(b);
+    }
+    li.appendChild(meta);
+    if (status === "applied") li.appendChild(node("p", "sg-answer", "Claude applied it" + (s.fix ? ": " + sentence(s.fix) : ".")));
+    if (status === "declined") li.appendChild(node("p", "sg-answer", "Claude did not apply it" + (s.reply ? ": " + sentence(s.reply) : ".")));
+    return li;
+  }
+  function renderSuggestions(people) {
+    var groups = {};
+    Object.keys(suggestions).forEach(function (k) {
+      var s = suggestions[k];
+      if (s && byId[s.entry]) (groups[s.entry] = groups[s.entry] || []).push({ id: k, s: s });
+    });
+    ids.forEach(function (id) {
+      var list = (groups[id] || []).sort(function (a, b) { return String(a.s.at).localeCompare(String(b.s.at)); });
+      var box = document.getElementById("sgl-" + anchorId(id));
+      if (box) {
+        var ul = box.querySelector("ul");
+        ul.textContent = "";
+        list.forEach(function (item) { ul.appendChild(suggestionItem(item.id, item.s, people)); });
+        box.hidden = list.length === 0;
+      }
+      var open = list.filter(function (item) { return item.s.status === "open"; }).length;
+      each('[data-sgcount="' + CSS.escape(id) + '"]', function (a) {
+        a.hidden = open === 0;
+        a.textContent = open === 1 ? "1 suggested edit" : open + " suggested edits";
+      });
+    });
+  }
+
+  var renderQueued = false;
+  function render() {
+    if (renderQueued) return;
+    renderQueued = true;
+    Promise.resolve().then(async function () {
+      renderQueued = false;
+      var people = {}, seen = {};
+      [verdicts, suggestions].forEach(function (group) {
+        Object.keys(group).forEach(function (k) { if (group[k] && group[k].by) seen[group[k].by] = true; });
+      });
+      var personIds = Object.keys(seen);
+      if (user && personIds.length) { try { people = await user.profiles(personIds); } catch (e) { people = {}; } }
+      var reviewed = 0;
+      ids.forEach(function (id) {
+        var v = verdicts[id];
+        var state = v && LABEL[v.status] ? v.status : "open";
+        if (state === "approved" || state === "changes") reviewed += 1;
+        each('[data-chip="' + CSS.escape(id) + '"]', function (chip) { chip.dataset.state = state; chip.textContent = LABEL[state]; });
+        var el = section(id);
+        if (el) el.dataset.state = state;
+        var status = document.getElementById("vs-" + anchorId(id));
+        if (status) status.textContent = describe(v, people);
+      });
+      document.getElementById("progress-text").textContent = reviewed + " of " + ids.length + " reviewed";
+      document.getElementById("bar-fill").style.width = (reviewed / ids.length * 100) + "%";
+      renderSuggestions(people);
+      paintHighlights();
+    });
+  }
+
+  function refreshButtons(id) {
+    var el = section(id);
+    if (!el) return;
+    Array.prototype.forEach.call(el.querySelectorAll(".verdict button"), function (b) {
+      if (b.dataset.action === "comment") return;
+      b.disabled = !db || !canWrite || !!busy[id];
+    });
+  }
+  function refreshHints() {
+    var on = !!comments || canSuggest();
+    each(".sel-hint", function (h) { h.hidden = !on; });
+  }
+  function lockSaving(message) {
+    ids.forEach(refreshButtons);
+    refreshHints();
+    setNotice(message);
+    render();
+  }
+
+  async function save(id, body) {
+    if (!db || !canWrite || busy[id]) return;
+    busy[id] = true;
+    refreshButtons(id);
+    try {
+      await retryOnce(function () {
+        return db.doc("verdicts/" + id).set({ status: body.status, note: body.note || "", by: myId, at: new Date().toISOString() });
+      });
+    } catch (e) {
+      var message = saveFailed(e, "verdicts");
+      if (message) setNotice(message);
+    } finally {
+      busy[id] = false;
+      refreshButtons(id);
+    }
+  }
+
+  async function ask(id) {
+    var anchor = anchorId(id);
+    var box = document.getElementById("ask-" + anchor);
+    var question = box.value.trim();
+    var el = section(id);
+    if (!question || !sample || !el) return;
+    var out = el.querySelector(".answer");
+    var askBtn = el.querySelector('[data-action="ask"]');
+    var stopBtn = el.querySelector('[data-action="stop"]');
+    var entry = byId[id];
+    var prompt = [
+      "You are helping someone who is new to Software Design Descriptions (SDDs) review one part of an SDD.",
+      "Answer the question in plain words, in at most 6 short sentences, without headings.",
+      "If the answer is not in this part, say which part of an SDD would usually cover it.",
+      "",
+      "Part: " + entry.id + " " + entry.title + " (" + entry.kind + ")",
+      "",
+      entry.markdown.slice(0, 6000),
+      "",
+      "Question: " + question
+    ].join("\n");
+    var ctl = new AbortController();
+    controllers[id] = ctl;
+    askBtn.disabled = true;
+    stopBtn.hidden = false;
+    out.textContent = "Thinking...";
+    try {
+      await sample(prompt, { signal: ctl.signal, modelTier: "quick", onText: function (u) { out.textContent = u.text; } });
+    } catch (e) {
+      var code = e && e.code;
+      if (code === "cancelled") out.textContent = e.text || "";
+      else if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].indexOf(code) >= 0) {
+        each(".ask", function (a) { a.hidden = true; });
+      } else if (code === "rate_limited") out.textContent = "Too many questions at once. Try again in a minute.";
+      else if (code === "session_expired") out.textContent = "Your session expired. Sign in again on claude.ai, then ask.";
+      else if (code === "refused") out.textContent = "Claude could not answer that. Try asking another way.";
+      else out.textContent = (e && e.text ? e.text + "\n\n" : "") + "The answer did not finish. Ask again.";
+    } finally {
+      askBtn.disabled = false;
+      stopBtn.hidden = true;
+      delete controllers[id];
+    }
+  }
+
+  function commentsUnavailable() {
+    comments = null;
+    each('[data-action="comment"], [data-action="sel-comment"]', function (b) { b.hidden = true; });
+    refreshHints();
+  }
+  async function openComposer(target) {
+    if (!comments) return;
+    try { await comments.openComposer(target); }
+    catch (e) {
+      if (e && e.code === "unavailable") commentsUnavailable();
+      else setNotice("The comment box did not open. Try again.");
+    }
+  }
+
+  // ---- the two tabs
+  function show(v, key) {
+    view = v === "original" ? "original" : "guided";
+    guided.hidden = view !== "guided";
+    original.hidden = view !== "original";
+    each(".view-btn", function (b) { b.setAttribute("aria-pressed", String(b.dataset.view === view)); });
+    try { localStorage.setItem("sdd-review-view", view); } catch (e) {}
+    hideSelbar();
+    var target = key && document.getElementById((view === "original" ? "d-" : "s-") + key);
+    if (target) target.scrollIntoView({ block: "start" });
+  }
+  function route() {
+    var h = location.hash.slice(1);
+    if (h.indexOf("d-") === 0) show("original", h.slice(2));
+    else if (h.indexOf("s-") === 0) show("guided", h.slice(2));
+  }
+  function go(hash) {
+    if (location.hash === hash) route();
+    else location.hash = hash;
+  }
+  window.addEventListener("hashchange", route);
+
+  // ---- selecting SDD text
+  function scopeOf(n) {
+    var e = n && (n.nodeType === 1 ? n : n.parentElement);
+    return e ? e.closest("[data-sel]") : null;
+  }
+  function readSelection() {
+    var sel = window.getSelection ? window.getSelection() : null;
+    if (!sel || !sel.rangeCount || sel.isCollapsed) return null;
+    var range = sel.getRangeAt(0);
+    var scope = scopeOf(range.startContainer);
+    if (!scope || scope !== scopeOf(range.endContainer)) return null;
+    var quote = sel.toString().trim();
+    if (!quote) return null;
+    var head = document.createRange();
+    head.selectNodeContents(scope);
+    head.setEnd(range.startContainer, range.startOffset);
+    var start = head.toString().length;
+    var end = start + range.toString().length;
+    var text = scope.textContent;
+    return { id: scope.dataset.sel, range: range.cloneRange(), quote: quote,
+             before: text.slice(Math.max(0, start - 40), start), after: text.slice(end, end + 40) };
+  }
+  function hideSelbar() { selbar.hidden = true; }
+  function placeSelbar() {
+    if (barPress) return;
+    var s = dialog.open ? null : readSelection();
+    if (!s || (!comments && !canSuggest())) { hideSelbar(); return; }
+    selState = s;
+    selbar.querySelector('[data-action="sel-comment"]').hidden = !comments;
+    selbar.querySelector('[data-action="sel-suggest"]').hidden = !canSuggest();
+    var rects = s.range.getClientRects();
+    var r = rects.length ? rects[rects.length - 1] : s.range.getBoundingClientRect();
+    selbar.hidden = false;
+    var maxLeft = window.scrollX + document.documentElement.clientWidth - selbar.offsetWidth - 8;
+    selbar.style.left = Math.max(window.scrollX + 8, Math.min(r.left + window.scrollX, maxLeft)) + "px";
+    selbar.style.top = (r.bottom + window.scrollY + 8) + "px";
+  }
+  document.addEventListener("selectionchange", function () {
+    clearTimeout(selTimer);
+    selTimer = setTimeout(placeSelbar, 120);
+  });
+  window.addEventListener("resize", function () { if (!selbar.hidden) placeSelbar(); });
+  // Keep the selection when a bar button is pressed, and keep the bar up until its click lands.
+  selbar.addEventListener("pointerdown", function (ev) { ev.preventDefault(); barPress = true; });
+  selbar.addEventListener("mousedown", function (ev) { ev.preventDefault(); });
+  function releaseBar() { setTimeout(function () { barPress = false; }, 400); }
+  selbar.addEventListener("pointerup", releaseBar);
+  selbar.addEventListener("pointercancel", releaseBar);
+
+  function showSgError(text) { sgError.textContent = text; sgError.hidden = !text; }
+  function openSuggest() {
+    var s = selState;
+    hideSelbar();
+    if (!s || !canSuggest()) return;
+    draft = s;
+    var entry = byId[s.id];
+    sgWhere.textContent = entry ? "In " + entry.id + " " + entry.title : "";
+    sgQuote.textContent = s.quote;
+    sgNew.value = s.quote;
+    sgWhy.value = "";
+    var tooLong = s.quote.length > 2000;
+    showSgError(tooLong ? "That selection is long. Select at most about 2,000 characters." : "");
+    sgSave.disabled = tooLong;
+    try { dialog.showModal(); } catch (e) { dialog.setAttribute("open", ""); }
+    sgNew.focus();
+    sgNew.select();
+  }
+  async function saveSuggestion() {
+    if (!draft || !canSuggest()) return;
+    var replacement = sgNew.value.trim();
+    if (replacement === draft.quote.trim()) { showSgError("Change the text first, or press Cancel."); return; }
+    var s = draft;
+    sgSave.disabled = true;
+    // One reference per draft: a retry, or a second Save after an error, writes the same document.
+    if (!s.ref) s.ref = db.collection("suggestions").doc();
+    try {
+      await retryOnce(function () {
+        return s.ref.set({
+          entry: s.id, quote: s.quote, before: s.before, after: s.after, replacement: replacement,
+          note: sgWhy.value.trim(), by: myId, at: new Date().toISOString(), status: "open"
+        });
+      });
+      dialog.close();
+      var sel = window.getSelection && window.getSelection();
+      if (sel) sel.removeAllRanges();
+    } catch (e) {
+      var message = saveFailed(e, "suggested edits");
+      if (message) showSgError(message);
+      else dialog.close();
+    } finally {
+      sgSave.disabled = false;
+    }
+  }
+  sgForm.addEventListener("submit", function (ev) { ev.preventDefault(); saveSuggestion(); });
+  dialog.addEventListener("close", function () { draft = null; showSgError(""); });
+
+  async function withdraw(docId) {
+    if (!docId || !canSuggest()) return;
+    try { await retryOnce(function () { return db.doc("suggestions/" + docId).delete(); }); }
+    catch (e) {
+      var message = saveFailed(e, "suggested edits");
+      if (message) setNotice("The suggestion was not withdrawn. " + message);
+    }
+  }
+
+  document.addEventListener("click", function (ev) {
+    var link = ev.target.closest('a[href^="#d-"], a[href^="#s-"]');
+    if (link) {
+      var href = link.getAttribute("href");
+      if (link.classList.contains("toc-link") && view === "original") href = "#d-" + href.slice(3);
+      ev.preventDefault();
+      go(href);
+      return;
+    }
+    var btn = ev.target.closest("button[data-action]");
+    if (!btn) return;
+    var action = btn.dataset.action;
+    if (action === "view") {
+      if (currentKey) go("#" + (btn.dataset.view === "original" ? "d-" : "s-") + currentKey);
+      else show(btn.dataset.view);
+      return;
+    }
+    if (action === "sel-comment") { hideSelbar(); if (selState) openComposer({ range: selState.range }); return; }
+    if (action === "sel-suggest") { openSuggest(); return; }
+    if (action === "sg-cancel") { dialog.close(); return; }
+    if (action === "withdraw") { withdraw(btn.dataset.doc); return; }
+    var id = btn.dataset.id;
+    var el = section(id);
+    var noteRow = el && el.querySelector(".note-row");
+    var noteBox = document.getElementById("note-" + anchorId(id));
+    switch (action) {
+      case "approve": if (noteRow) noteRow.hidden = true; save(id, { status: "approved" }); break;
+      case "changes": if (noteRow) { noteRow.hidden = false; noteBox.focus(); } break;
+      case "save-note": save(id, { status: "changes", note: noteBox.value.trim() }); if (noteRow) noteRow.hidden = true; break;
+      case "cancel-note": if (noteRow) noteRow.hidden = true; break;
+      case "ask": ask(id); break;
+      case "stop": if (controllers[id]) controllers[id].abort(); break;
+      case "comment": if (el) openComposer({ element: el }); break;
+    }
+  });
+  document.addEventListener("keydown", function (ev) {
+    var box = ev.target;
+    if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey) && box.id && box.id.indexOf("ask-") === 0) {
+      var el = box.closest(".entry");
+      if (el) ask(el.dataset.id);
+    }
+  });
+
+  if ("IntersectionObserver" in window) {
+    var links = {};
+    each(".toc-link", function (a) { links[a.getAttribute("href").slice(3)] = a; });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        currentKey = en.target.id.slice(2);
+        Object.keys(links).forEach(function (k) { links[k].removeAttribute("aria-current"); });
+        if (links[currentKey]) links[currentKey].setAttribute("aria-current", "true");
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    each(".entry, .doc-part", function (s) { observer.observe(s); });
+  }
+
+  render();
+  ids.forEach(refreshButtons);
+  (function startView() {
+    var stored = null;
+    try { stored = localStorage.getItem("sdd-review-view"); } catch (e) {}
+    if (/^#[ds]-/.test(location.hash)) route();
+    else if (stored === "original") show("original");
+  })();
+
+  function use(name) {
+    return (window.claude && typeof window.claude.use === "function") ? window.claude.use(name).catch(function () { return null; }) : Promise.resolve(null);
+  }
+
+  use("db").then(async function (ns) {
+    db = ns;
+    user = await use("user");
+    if (!db) { lockSaving("Verdicts and suggested edits can be saved only on claude.ai, while signed in. Everything else on this page still works."); return; }
+    if (user) {
+      try { myId = await user.id(); } catch (e) { myId = null; }
+      try { if ((await user.can("data.write")) === false) { canWrite = false; lockSaving("You can read this review, but your access level cannot save verdicts or suggested edits."); } } catch (e) {}
+    }
+    ids.forEach(refreshButtons);
+    refreshHints();
+    db.collection("verdicts").onSnapshot(function (snap) {
+      var next = {};
+      snap.docs.forEach(function (d) { if (d.exists) next[d.id] = d.data(); });
+      verdicts = next;
+      render();
+    }, function () { setNotice("Saved verdicts could not be loaded. Reload the page to try again."); });
+    db.collection("suggestions").onSnapshot(function (snap) {
+      var next = {};
+      snap.docs.forEach(function (d) { if (d.exists) next[d.id] = d.data(); });
+      suggestions = next;
+      render();
+    }, function () { setNotice("Suggested edits could not be loaded. Reload the page to try again."); });
+  });
+
+  use("sample").then(function (fn) {
+    if (!fn) return;
+    sample = fn;
+    each(".ask", function (a) { a.hidden = false; });
+  });
+
+  use("comments").then(function (ns) {
+    if (!ns) return;
+    comments = ns;
+    each('[data-action="comment"]', function (b) { b.hidden = false; });
+    refreshHints();
+  });
+})();
+</script>

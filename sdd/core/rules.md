@@ -1,0 +1,65 @@
+# Rules shared by /sdd:write, /sdd:review and /sdd:publish
+
+## Reference (do not guess these)
+
+- **Plugin root:** the folder the skill named when it started (`<plugin root>` in these procedures). Every file path and every `S` command below starts there.
+- **Helper:** `python3 <plugin root>/scripts/sdd.py`, called `S` in the procedures. `S <command> --help` shows options.
+- **Settings:** `S settings` prints the user's settings merged with the defaults. They come from `sdd/settings.json` in the Claude config folder (`$CLAUDE_CONFIG_DIR`, or `~/.claude` when it is not set), so each Claude account has its own. Run it once per session. Every key is optional:
+  - `organization`: the organization `S new` puts in the title block.
+  - `notion`: where pages go and how they look. `notion_enabled` is true only when it names a `data_source_id`; otherwise Notion sync is off and every Notion step is skipped.
+  - `grounding`: a read-only `aws_profile` and `kube_context` for grounding views in what runs today. Empty means no cloud reads.
+  - `warnings` lists keys the helper ignores, and exit code 1 with an `error` means the file is broken. Say either once, in one line, and carry on (a broken file means Notion is off).
+- **Template:** `core/template.md`, the jam01 SDD template (commit 5dca2e5, CC0) plus front matter, section 1.6 Requirements and the record formats for Sections 3 and 4.
+- **Worked example:** `tests/fixtures/full.md`.
+- **Notion:** through whatever Notion connection the user has, the claude.ai Notion connector or a Notion MCP server. Call its tools by what they do, whatever prefix the connection gives them: `notion-search`, `notion-fetch`, `notion-create-pages`, `notion-update-page`, `notion-get-async-task`, and for review comments `notion-get-comments` and `notion-create-comment`. The user may be asked to allow each one the first time it runs. Nothing here needs `notion-query-data-sources`, which some plans do not have.
+  - New pages go under the data source `notion.data_source_id`.
+  - Properties: `S props` builds them from the settings: the title (with `notion.title_prefix`), `notion.fixed_properties`, the status from `notion.status_values`, and the tags as a JSON-array string such as `"[\"Infra\", \"Kubernetes\"]"`.
+  - Page icon: `notion.page_icon`, or none when it is empty.
+  - Notion on in the settings but no Notion tools in this session: say once that this session cannot sync, set `notion_pending=true` after each write, and carry on. The next session with Notion catches up.
+- **Notion comments:** every reply Claude posts starts with `[sdd]`, so a later review can tell answered threads apart. Never resolve or delete a comment; the person who wrote it resolves it.
+- **Tags:** when Notion is on and `notion.tags` lists the database's options, pick only from that list. Otherwise suggest 2 to 4 short tags that fit the design.
+- **Grounding:** only with the `grounding` values from the settings, and only read-only commands, for example `kubectl --context <kube_context> get ...` or `AWS_PROFILE=<aws_profile> aws <service> describe-...`. Never a write profile. Without grounding values, take what runs today from the repo or ask the user.
+
+## Files
+
+- **Location:** inside a git repo, `<repo root>/docs/sdd/<slug>.md`. Otherwise `~/sdd/<slug>.md`.
+- **Slug:** kebab-case from the title, a to z, 0 to 9 and hyphens, at most 40 characters.
+- **Source of truth:** the markdown file. The Notion page is a copy regenerated on every sync, so edits made in Notion are overwritten (the drift check in `sync.md` catches them first).
+- **Git:** never commit or push. The user commits.
+- **Front matter keys:** title, slug, kind (new, existing, change), version, status (draft, published), author, organization, created, updated, tags, links, notion_page_id, notion_last_sync, notion_pending, review_url (the review page, see `core/review.md` part 6). Change them with `S meta <file> --set key=value`, never by hand.
+- **Section bodies:** write them with `S section <file> <id> --write` and a heredoc. It replaces everything between the section heading and the next heading of the same or higher level, template comments included, and keeps the heading line.
+
+## IDs
+
+- Requirements: `R1`, `R2` and so on, in the 1.6 table. When the repo already defines IDs (for example `SEL-001` in `specs/`), use those.
+- Views: `V1`, `V2` and so on, as `### V<n> <Viewpoint>: <title>` in Section 3.
+- Decisions: `ADR-001`, `ADR-002` and so on, as `### ADR-<nnn> <title>` in Section 4.
+
+## Section states (computed by `S status`)
+
+- **todo:** the body is empty or still exactly the template's.
+- **done:** the body has content.
+- **skipped:** the body has a `**TODO:** <what is missing>` line.
+- **na:** the body is `_Not applicable: <reason>_`.
+
+## Writing rules for anything that goes into the SDD
+
+`S lint` enforces the mechanical rules (em-dash, diagram direction, placeholders, emoji, traceability). These are the judgment rules:
+
+1. **Concrete.** Real names, numbers, paths, commands and versions. "p95 under 300 ms at 50 requests per second", not "fast".
+2. **Never invent facts.** A number, owner, name or link you do not know is written as `{{what is needed}}`, for example `{{p95 latency target}}`. Lint blocks publishing until it is filled. Put placeholders in plain text where you can. Lint also catches multi-word ones inside inline code and diagram labels, but it skips anything that looks like a Helm or Go template (`{{ .Values.x }}`), so `{{x}}` written that way is not caught.
+3. **Plain sentences.** One idea per bullet. No metaphors, no filler, no em-dash: use a period, comma, colon or parentheses.
+4. **Template length hints:** 1.1 is 2 to 4 sentences, 1.2 is one purpose sentence plus in and out lists, 1.5 is 3 to 5 sentences.
+5. **No emoji in the file.** Heading marks, when the settings set any, are added by `S render` on the way to Notion.
+6. **Diagrams:** mermaid, `flowchart TB` for flowcharts, quoted labels when they hold punctuation, `<br>` for a line break inside a label. See `viewpoints.md`.
+7. **Tables:** normal pipe tables in the file. `S render` turns them into Notion tables.
+8. **Lists:** nested bullets are indented with 2 spaces. Soft-wrapped lines are fine; render joins them.
+
+## Question screens (AskUserQuestion)
+
+- 1 to 4 questions per screen, 2 to 4 options per question. The tool always adds "Other" for free text, so never add your own "Other".
+- `header`: at most 12 characters.
+- `preview`: only on single-select questions. Use it to show the exact markdown a draft will write.
+- `multiSelect` for picking several items: viewpoints, glossary terms, ADRs to keep, tags, normative references.
+- The user can attach notes to a pick. Treat notes as edit instructions for that pick.
+- An answer typed into Other is one of three things: a question (answer it, then show the same screen again), their own text (clean it up to the writing rules, show it, ask before writing), or "pause".

@@ -1,0 +1,14 @@
+{
+  "name": "claude-code-sdd",
+  "description": "Guided Software Design Descriptions (IEEE 1016) for Claude Code",
+  "owner": { "name": "Lim Eunhye", "url": "https://github.com/eeeemune" },
+  "plugins": [
+    {
+      "name": "sdd",
+      "source": "./sdd",
+      "description": "Write, review and publish Software Design Descriptions one section at a time: /sdd:write, /sdd:review, /sdd:publish",
+      "category": "development",
+      "tags": ["software-design", "spec-driven-development", "design-doc", "ieee-1016"]
+    }
+  ]
+}
