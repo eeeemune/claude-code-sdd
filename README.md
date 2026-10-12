@@ -6,9 +6,9 @@ The SDD is a plain markdown file in your repo (`docs/sdd/<slug>.md`, or `~/sdd/<
 
 ## Demo
 
-This plugin was designed with itself. Below is the review page (`/sdd:review`) for the SDD of this public release, written with `/sdd:write`. All 25 parts were approved after one round of fixes: two comments and two Needs changes verdicts became changes to the file, and Claude marked the changed parts for re-check. Each part has plain-language notes, a "Check yourself" question, an Ask box, and Approve or Needs changes. Selecting words in the SDD text lets you comment on them or suggest an edit.
+This plugin was designed with itself. Below is the review page (`/sdd:review`) for the SDD of this public release, written with `/sdd:write`, right after Claude acted on the first round of feedback: green parts are approved, and blue parts were changed by Claude and wait for a re-check, each with a line saying what changed. The second round approved all 25 parts. Each part has plain-language notes, a walk through its diagram, a "Check yourself" question, an Ask box, and Approve or Needs changes. Selecting words in the SDD text lets you comment on them or suggest an edit.
 
-![The review page for this plugin's own release SDD, with all 25 parts approved](docs/review-page-release-sdd.png)
+![The review page for this plugin's own release SDD after the first round of fixes: 13 parts approved, 12 waiting for a re-check](docs/review-page-recheck.png)
 
 A writing turn (`/sdd:write`) starts with a card like this one, then a question with two or three drafts of the section, each previewed as the exact markdown it will write:
 
