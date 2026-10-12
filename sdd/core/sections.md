@@ -5,7 +5,7 @@ One block per section, in writing order. Each block feeds one section turn:
 - the card shows **What it is**, **Why it matters**, **You decide** and a 1 to 3 line version of **Example**;
 - the drafts are built from the sources in **Drafts from**, in the shape shown in **Example**;
 - the question screen follows **Choice type**;
-- `/sdd:review` judges the section with **Review checks**.
+- `/sdd-planner:review` judges the section with **Review checks**.
 
 The running example is per-PR preview environments on EKS. The complete document is `tests/fixtures/full.md` in this plugin; show it when someone asks "what does a finished one look like?".
 

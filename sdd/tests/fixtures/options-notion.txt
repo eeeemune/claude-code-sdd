@@ -1,0 +1,12 @@
+organization=Acme
+notion_data_source_id=00000000-0000-0000-0000-000000000000
+notion_title_property=Name
+notion_title_prefix=SDD:
+notion_status_property=Status
+notion_status_draft=Doing
+notion_status_published=Done
+notion_tags_property=Tags
+notion_tags=Infra, Kubernetes, CI/CD
+notion_fixed_properties=Category=Document
+notion_heading_marks=💚 💛 🤍
+notion_page_icon=💚

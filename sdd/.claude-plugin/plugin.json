@@ -1,10 +1,10 @@
 {
-  "name": "sdd",
-  "displayName": "Software Design Descriptions",
-  "version": "1.1.0",
-  "description": "Guided Software Design Descriptions for spec-driven development: write one section at a time, review on a claude.ai page, publish with optional Notion sync",
+  "name": "sdd-planner",
+  "displayName": "SDD Planner",
+  "version": "2.0.0",
+  "description": "Plan software with Software Design Descriptions (IEEE 1016): write one section at a time, review on a claude.ai page, publish with optional Notion sync",
   "author": {
-    "name": "Lim Eunhye",
+    "name": "eeeemune",
     "url": "https://github.com/eeeemune"
   },
   "homepage": "https://github.com/eeeemune/claude-code-sdd",
@@ -17,5 +17,67 @@
     "spec-driven-development",
     "ieee-1016",
     "adr"
-  ]
+  ],
+  "userConfig": {
+    "organization": {
+      "type": "string",
+      "title": "Organization",
+      "description": "Shown in each new SDD's title block. Leave empty for none."
+    },
+    "notion_data_source_id": {
+      "type": "string",
+      "title": "Notion data source ID",
+      "description": "The Notion database (data source) that new SDD pages go into. Leave empty to keep Notion sync off."
+    },
+    "notion_title_property": {
+      "type": "string",
+      "title": "Notion title property",
+      "description": "The database's title property. Empty means Name."
+    },
+    "notion_title_prefix": {
+      "type": "string",
+      "title": "Page title prefix",
+      "description": "Put before each page title, followed by a space, for example SDD:"
+    },
+    "notion_status_property": {
+      "type": "string",
+      "title": "Notion status property",
+      "description": "A status property to set on each page. Empty means no status is set."
+    },
+    "notion_status_draft": {
+      "type": "string",
+      "title": "Status while drafting",
+      "description": "The status value for a draft, for example Doing."
+    },
+    "notion_status_published": {
+      "type": "string",
+      "title": "Status once published",
+      "description": "The status value after /sdd-planner:publish, for example Done."
+    },
+    "notion_tags_property": {
+      "type": "string",
+      "title": "Notion tags property",
+      "description": "A multi-select property for the SDD's tags. Empty means no tags are set."
+    },
+    "notion_tags": {
+      "type": "string",
+      "title": "Tag options",
+      "description": "The database's tag options Claude may pick from, separated by commas."
+    },
+    "notion_fixed_properties": {
+      "type": "string",
+      "title": "Fixed properties",
+      "description": "Properties set on every page, as Name=Value pairs separated by commas, for example Category=Document."
+    },
+    "notion_heading_marks": {
+      "type": "string",
+      "title": "Heading marks",
+      "description": "Three marks put before level 1, 2 and 3 headings on the page, separated by spaces. Empty means plain headings."
+    },
+    "notion_page_icon": {
+      "type": "string",
+      "title": "Page icon",
+      "description": "An emoji for the page icon. Empty means none."
+    }
+  }
 }

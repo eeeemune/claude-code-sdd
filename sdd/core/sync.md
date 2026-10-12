@@ -1,17 +1,17 @@
 # Sync: regenerate the Notion page from the SDD file
 
-Used by `/sdd:write` after every section, by `/sdd:review` after edits, and by `/sdd:publish`. The markdown file is the source of truth. Every sync rebuilds the whole page from it, so a sync can be repeated safely and a failed one is fixed by the next one. IDs and property formats are in `rules.md`.
+Used by `/sdd-planner:write` after every section, by `/sdd-planner:review` after edits, and by `/sdd-planner:publish`. The markdown file is the source of truth. Every sync rebuilds the whole page from it, so a sync can be repeated safely and a failed one is fixed by the next one. IDs and property formats are in `rules.md`.
 
 `S` = `python3 <plugin root>/scripts/sdd.py`
 
-**Notion off** (`notion_enabled` is false in `S settings`): every mode below does nothing. The markdown file is the whole SDD.
+**Notion off** (`notion_enabled` is false in `S options`): every mode below does nothing. The markdown file is the whole SDD.
 
 ## Draft mode
 
-1. **Render.** Run `S render <file>` (the page body) and `S props <file>` (the properties as JSON). If either fails, show the error, run `S meta <file> --set notion_pending=true`, and stop the sync. The section is already saved in the file.
+1. **Render.** Run `S render <file>` (the page body) and `S props <file>` (the properties as JSON), each with the options (`rules.md`). If either fails, show the error, run `S meta <file> --set notion_pending=true`, and stop the sync. The section is already saved in the file.
 2. **Find the page.** Read `notion_page_id` from `S meta <file>`.
 3. **No page yet: create it.** Call `notion-create-pages` with:
-   - `parent`: `{"type": "data_source_id", "data_source_id": "<notion.data_source_id from S settings>"}`
+   - `parent`: `{"type": "data_source_id", "data_source_id": "<notion.data_source_id from S options>"}`
    - one page with `icon` = `notion.page_icon` (leave it out when empty), `properties` = the JSON from `S props`, and `content` = the render output exactly as printed.
    Then store the new page id: `S meta <file> --set notion_page_id=<id>`.
 4. **Page exists: replace it.** Call `notion-update-page` with `page_id`, `command: "replace_content"`, `new_str` = the render output exactly as printed, and `allow_async: false`. If a property changed (the status after a release, the tags), make a second call with `command: "update_properties"` and the props JSON.
@@ -32,7 +32,7 @@ Pass the render output with its real newlines and tabs. Never turn them into `\n
 
 ## Drift check
 
-Run it when `/sdd:write` resumes a file in a new session, and at the start of `/sdd:publish`.
+Run it when `/sdd-planner:write` resumes a file in a new session, and at the start of `/sdd-planner:publish`.
 
 1. No `notion_page_id`: skip.
 2. `notion-fetch` the page and read its `Last edited time` property.
@@ -43,11 +43,11 @@ Run it when `/sdd:write` resumes a file in a new session, and at the start of `/
 
 ## Final mode
 
-Used by `/sdd:publish` after `S release`. Run draft mode (the props now say Status Done), then verify by reading the page back:
+Used by `/sdd-planner:publish` after `S release`. Run draft mode (the props now say Status Done), then verify by reading the page back:
 
 1. `notion-fetch` the page.
 2. Check each item and report it as pass or fail:
-   - **Headings:** the number of level 1, 2 and 3 headings equals the counts in the render output, marks included when the settings set them.
+   - **Headings:** the number of level 1, 2 and 3 headings equals the counts in the render output, marks included when the options set them.
    - **Tables:** the number of tables on the page equals the number of `<table header-row="true">` lines in the render output.
    - **Diagrams:** the number of mermaid code blocks matches.
    - **Blocks:** one table of contents block and the gray header callout are present.

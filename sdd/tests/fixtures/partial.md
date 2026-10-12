@@ -4,7 +4,7 @@ slug: preview-envs
 kind: new
 version: 0.1
 status: draft
-author: Lim Eunhye
+author: eeeemune
 organization: Acme
 created: 2026-10-06
 updated: 2026-10-06
@@ -20,7 +20,7 @@ notion_pending: false
 ## For Per-PR preview environments
 
 Version 0.1  
-Prepared by Lim Eunhye  
+Prepared by eeeemune  
 Acme  
 2026-10-06
 
@@ -46,7 +46,7 @@ Acme
 
 | Name | Date | Reason For Changes | Version |
 |------|------|--------------------|---------|
-| Lim Eunhye | 2026-10-06 | Initial draft | 0.1 |
+| eeeemune | 2026-10-06 | Initial draft | 0.1 |
 
 ## 1. Introduction
 <!-- overview of the SDD: purpose, scope, audience, and structure -->

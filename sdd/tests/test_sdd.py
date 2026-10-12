@@ -25,8 +25,6 @@ VIEWPOINTS = [
     "Interaction", "Algorithm", "State Dynamics", "Concurrency", "Patterns", "Deployment", "Resources",
 ]
 EM_DASH = "\u2014"
-# The CLI reads sdd/settings.json from the Claude config folder; tests point it at an empty one by default.
-EMPTY_CONFIG = Path(tempfile.mkdtemp(prefix="sdd-test-config-"))
 
 
 def _load():
@@ -51,25 +49,16 @@ def read(name):
     return (FIX / name).read_text(encoding="utf-8")
 
 
-def run_cli(*args, config_dir=None):
+def run_cli(*args, stdin=None):
     sdd()  # a missing script must fail the test, not satisfy a "non-zero exit" assertion
-    env = dict(os.environ, CLAUDE_CONFIG_DIR=str(config_dir or EMPTY_CONFIG))
     return subprocess.run(
-        [sys.executable, "-I", str(SCRIPT), *map(str, args)], capture_output=True, text=True, env=env
+        [sys.executable, "-I", str(SCRIPT), *map(str, args)], capture_output=True, text=True, input=stdin
     )
 
 
 def notion_settings():
-    """Settings that reproduce the plugin's behavior before settings existed: SDD: titles, hearts, Doing/Done."""
-    return sdd().settings_from(json.loads(read("settings-notion.json")))
-
-
-def config_with(raw_text):
-    """A Claude config folder whose sdd/settings.json holds raw_text."""
-    folder = Path(tempfile.mkdtemp(prefix="sdd-test-config-"))
-    (folder / "sdd").mkdir()
-    (folder / "sdd" / "settings.json").write_text(raw_text, encoding="utf-8")
-    return folder
+    """Options that reproduce the plugin's behavior before options existed: SDD: titles, hearts, Doing/Done."""
+    return sdd().load_options(read("options-notion.txt"))
 
 
 def code_line_indexes(lines):
@@ -89,11 +78,11 @@ def code_blocks(text):
 
 
 class NewTests(unittest.TestCase):
-    def new(self, out, *extra, org=("--org", "Acme"), config_dir=None):
+    def new(self, out, *extra, org=("--org", "Acme"), stdin=None):
         return run_cli(
             "new", "--title", "Per-PR preview environments", "--slug", "preview-envs", "--kind", "new",
-            "--author", "Lim Eunhye", *org, "--tags", "Infra,Kubernetes",
-            "--date", "2026-10-06", "--out", out, *extra, config_dir=config_dir,
+            "--author", "eeeemune", *org, "--tags", "Infra,Kubernetes",
+            "--date", "2026-10-06", "--out", out, *extra, stdin=stdin,
         )
 
     def test_new_creates_all_sections(self):
@@ -116,19 +105,19 @@ class NewTests(unittest.TestCase):
             self.assertEqual(fm["tags"], ["Infra", "Kubernetes"])
             self.assertEqual(fm["created"], "2026-10-06")
             self.assertEqual(fm["status"], "draft")
-            self.assertEqual(sdd().revision_rows(text), [["Lim Eunhye", "2026-10-06", "Initial draft", "0.1"]])
+            self.assertEqual(sdd().revision_rows(text), [["eeeemune", "2026-10-06", "Initial draft", "0.1"]])
             st = json.loads(run_cli("status", out).stdout)
             self.assertEqual(st["done"], 0)
             self.assertEqual(st["next"], "1.2")
 
-    def test_new_takes_the_organization_from_settings(self):
+    def test_new_takes_the_organization_from_the_options(self):
         with tempfile.TemporaryDirectory() as d:
             out = Path(d) / "a.md"
-            r = self.new(out, org=(), config_dir=config_with('{"organization": "Acme"}'))
+            r = self.new(out, "--options", "-", org=(), stdin="organization=Acme\n")
             self.assertEqual(r.returncode, 0, r.stderr)
             text = out.read_text(encoding="utf-8")
             self.assertEqual(sdd().parse_front_matter(text)["organization"], "Acme")
-            self.assertIn("Prepared by Lim Eunhye  \nAcme  \n2026-10-06\n", text)
+            self.assertIn("Prepared by eeeemune  \nAcme  \n2026-10-06\n", text)
 
     def test_new_without_organization_drops_its_line(self):
         with tempfile.TemporaryDirectory() as d:
@@ -136,7 +125,7 @@ class NewTests(unittest.TestCase):
             r = self.new(out, org=())
             self.assertEqual(r.returncode, 0, r.stderr)
             text = out.read_text(encoding="utf-8")
-            self.assertIn("Prepared by Lim Eunhye  \n2026-10-06\n", text)
+            self.assertIn("Prepared by eeeemune  \n2026-10-06\n", text)
             self.assertEqual(sdd().parse_front_matter(text)["organization"], "")
             self.assertNotIn("{{", text)
 
@@ -416,69 +405,75 @@ class PropsTests(unittest.TestCase):
         self.assertEqual(sdd().props(read("full.md")), {"Name": "Per-PR preview environments"})
 
 
-class SettingsTests(unittest.TestCase):
-    def test_no_file_means_notion_off(self):
-        s = sdd().load_settings(Path(tempfile.mkdtemp()))
-        self.assertFalse(s["found"])
+class OptionsTests(unittest.TestCase):
+    def test_no_options_means_notion_off(self):
+        s = sdd().load_options("")
         self.assertFalse(s["notion_enabled"])
         self.assertEqual(s["organization"], "")
         self.assertEqual(s["notion"]["heading_marks"], [])
-        self.assertNotIn("grounding", s)  # the plugin never reads cloud credentials (ADR-010)
         self.assertEqual((s["warnings"], s["error"]), ([], None))
 
-    def test_file_merges_with_defaults(self):
-        s = sdd().load_settings(config_with('{"organization": "Acme", "notion": {"data_source_id": "x", "tags": ["A"]}}'))
-        self.assertTrue(s["found"])
+    def test_options_block_maps_to_settings(self):
+        s = notion_settings()
         self.assertTrue(s["notion_enabled"])
         self.assertEqual(s["organization"], "Acme")
-        self.assertEqual(s["notion"]["title_property"], "Name")
-        self.assertEqual(s["notion"]["tags"], ["A"])
+        n = s["notion"]
+        self.assertEqual(n["tags"], ["Infra", "Kubernetes", "CI/CD"])
+        self.assertEqual(n["fixed_properties"], {"Category": "Document"})
+        self.assertEqual(n["status_values"], {"draft": "Doing", "published": "Done"})
+        self.assertEqual(n["heading_marks"], ["\U0001F49A", "\U0001F49B", "\U0001F90D"])
+        self.assertEqual(n["title_prefix"], "SDD:")
 
-    def test_notion_block_without_data_source_is_off(self):
-        s = sdd().load_settings(config_with('{"notion": {"title_prefix": "SDD: "}}'))
+    def test_unset_placeholders_count_as_empty(self):
+        s = sdd().load_options("organization=${user_config.organization}\n"
+                               "notion_data_source_id=${user_config.notion_data_source_id}\n")
+        self.assertEqual(s["organization"], "")
+        self.assertFalse(s["notion_enabled"])
+        self.assertEqual(s["warnings"], [])
+
+    def test_unknown_key_warns(self):
+        s = sdd().load_options("organisation=Acme\nnotion_data_source_id=x\n")
+        self.assertEqual(s["warnings"], ["unknown option 'organisation' is ignored"])
+        self.assertTrue(s["notion_enabled"])
+
+    def test_heading_marks_need_three(self):
+        s = sdd().load_options("notion_data_source_id=x\nnotion_heading_marks=A B\n")
+        self.assertIn("notion_heading_marks", s["error"])
+        self.assertFalse(s["notion_enabled"])
+        self.assertEqual(s["notion"]["heading_marks"], [])
+
+    def test_fixed_properties_need_name_value_pairs(self):
+        s = sdd().load_options("notion_data_source_id=x\nnotion_fixed_properties=Category\n")
+        self.assertIn("notion_fixed_properties", s["error"])
         self.assertFalse(s["notion_enabled"])
 
-    def test_unknown_keys_warn(self):
-        s = sdd().load_settings(config_with('{"organisation": "x", "notion": {"data_source": "y"}}'))
-        self.assertEqual(len(s["warnings"]), 2)
-        self.assertIn("organisation", s["warnings"][0])
-        self.assertIn("notion.data_source", s["warnings"][1])
-        self.assertFalse(s["notion_enabled"])
+    def test_title_prefix_is_followed_by_a_space(self):
+        s = sdd().load_options("notion_title_prefix=SDD:\n")
+        self.assertEqual(sdd().props(read("full.md"), s)["Name"], "SDD: Per-PR preview environments")
 
-    def test_old_grounding_block_is_ignored_with_a_warning(self):
-        s = sdd().load_settings(config_with('{"grounding": {"aws_profile": "readonly"}, "organization": "Acme"}'))
-        self.assertEqual(s["warnings"], ["unknown key 'grounding' is ignored"])
-        self.assertEqual(s["organization"], "Acme")
-        self.assertNotIn("grounding", s)
-
-    def test_invalid_json_names_the_line_and_turns_notion_off(self):
-        s = sdd().load_settings(config_with('{\n  "organization": "Acme"\n  "notion": {}\n}\n'))  # missing comma
-        self.assertIn("line 3", s["error"])
-        self.assertFalse(s["notion_enabled"])
-
-    def test_wrong_type_is_an_error(self):
-        s = sdd().load_settings(config_with('{"notion": {"data_source_id": "x", "tags": "Infra"}}'))
-        self.assertIn("notion.tags", s["error"])
-        self.assertFalse(s["notion_enabled"])
-
-    def test_settings_cli(self):
-        r = run_cli("settings", config_dir=config_with('{"organization": "Acme"}'))
+    def test_options_cli_reads_stdin(self):
+        r = run_cli("options", "--options", "-", stdin="organization=Acme\nbogus=1\n")
         self.assertEqual(r.returncode, 0, r.stderr)
         out = json.loads(r.stdout)
         self.assertEqual(out["organization"], "Acme")
-        self.assertTrue(out["path"].endswith("sdd/settings.json"))
-        r = run_cli("settings", config_dir=config_with("{"))
+        self.assertEqual(out["warnings"], ["unknown option 'bogus' is ignored"])
+        r = run_cli("options", "--options", "-", stdin="notion_heading_marks=A\n")
         self.assertEqual(r.returncode, 1)
-        self.assertIn("line 1", json.loads(r.stdout)["error"])
+        self.assertIn("notion_heading_marks", json.loads(r.stdout)["error"])
 
-    def test_render_and_props_cli_read_settings(self):
-        folder = config_with(read("settings-notion.json"))
-        r = run_cli("props", FIX / "full.md", config_dir=folder)
+    def test_render_and_props_cli_take_the_options(self):
+        block = read("options-notion.txt")
+        r = run_cli("props", FIX / "full.md", "--options", "-", stdin=block)
         self.assertEqual(json.loads(r.stdout)["Name"], "SDD: Per-PR preview environments")
-        r = run_cli("render", FIX / "full.md", config_dir=folder)
+        r = run_cli("render", FIX / "full.md", "--options", "-", stdin=block)
         self.assertIn("## \U0001F49B 1.6 Requirements", r.stdout)
         r = run_cli("render", FIX / "full.md")
         self.assertIn("## 1.6 Requirements", r.stdout)
+
+    def test_helper_reads_no_settings_file(self):
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertNotIn("CLAUDE_CONFIG_DIR", source)
+        self.assertNotIn("settings.json", source)
 
 
 class MetaTests(unittest.TestCase):
@@ -684,8 +679,8 @@ class ReviewPageTests(unittest.TestCase):
 
     def test_last_card_points_to_the_default_review_command(self):
         page = sdd().review_page(read("full.md"), SAMPLE_NOTES, source_label="x.md")
-        self.assertIn("Run /sdd:review in Claude Code", page)
-        self.assertNotIn("/sdd:review page", page)
+        self.assertIn("Run /sdd-planner:review in Claude Code", page)
+        self.assertNotIn("/sdd-planner:review page", page)
 
     def test_page_changes_lists_entries_edited_since_the_page_was_built(self):
         text = read("full.md")
@@ -742,7 +737,7 @@ class OriginalDocumentTests(unittest.TestCase):
         html = sdd().original_html(read("full.md"))
         self.assertIn('<h2 class="doc-title">Software Design Description</h2>', html)
         self.assertIn('<p class="doc-subtitle">For Per-PR preview environments</p>', html)
-        self.assertIn("Version 0.1<br>Prepared by Lim Eunhye<br>Acme<br>2026-10-06", html)
+        self.assertIn("Version 0.1<br>Prepared by eeeemune<br>Acme<br>2026-10-06", html)
         self.assertIn('<h3 class="doc-chapter">Revision History</h3>', html)
         self.assertIn("<td>Initial draft</td>", html)
         for chapter in ("1. Introduction", "2. Design Overview", "3. Design Views", "4. Decisions"):
@@ -789,16 +784,16 @@ class OriginalDocumentTests(unittest.TestCase):
 class ReleaseTests(unittest.TestCase):
     def test_release_versions(self):
         src = sdd().set_front_matter(read("full.md"), {"version": "0.4"})
-        out, info = sdd().release(src, reason="First published version", author="Lim Eunhye", date="2026-10-07")
+        out, info = sdd().release(src, reason="First published version", author="eeeemune", date="2026-10-07")
         fm = sdd().parse_front_matter(out)
         self.assertEqual((fm["version"], fm["status"], fm["updated"]), ("1.0", "published", "2026-10-07"))
         self.assertEqual(info["from"], "0.4")
         self.assertEqual(info["to"], "1.0")
         rows = sdd().revision_rows(out)
         self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[-1], ["Lim Eunhye", "2026-10-07", "First published version", "1.0"])
+        self.assertEqual(rows[-1], ["eeeemune", "2026-10-07", "First published version", "1.0"])
         self.assertIn("\nVersion 1.0  \n", out)
-        out2, info2 = sdd().release(out, reason="Added V5", author="Lim Eunhye", date="2026-10-08")
+        out2, info2 = sdd().release(out, reason="Added V5", author="eeeemune", date="2026-10-08")
         self.assertEqual(info2["to"], "1.1")
         self.assertEqual(len(sdd().revision_rows(out2)), 3)
 

@@ -1,20 +1,20 @@
-# Rules shared by /sdd:write, /sdd:review and /sdd:publish
+# Rules shared by /sdd-planner:write, /sdd-planner:review and /sdd-planner:publish
 
 ## Reference (do not guess these)
 
 - **Plugin root:** the folder the skill named when it started (`<plugin root>` in these procedures). Every file path and every `S` command below starts there.
 - **Helper:** `python3 <plugin root>/scripts/sdd.py`, called `S` in the procedures. `S <command> --help` shows options.
-- **Settings:** `S settings` prints the user's settings merged with the defaults. They come from `sdd/settings.json` in the Claude config folder (`$CLAUDE_CONFIG_DIR`, or `~/.claude` when it is not set), so each Claude account has its own. Run it once per session. Every key is optional:
+- **Options:** the user sets the plugin options with `/plugin configure sdd-planner@claude-code-sdd`, and Claude Code shows them in the skill as the **options block**, one `key=value` line each. The helper never reads them from a file: pass the block on stdin with a quoted heredoc, `S <command> --options - <<'OPTS'`, then the block exactly as the skill shows it, then `OPTS`. "With the options" below means that. `S options --options -` prints them merged with the defaults; run it once per session. Every option is optional, and one that still reads `${user_config...}` was never set:
   - `organization`: the organization `S new` puts in the title block.
-  - `notion`: where pages go and how they look. `notion_enabled` is true only when it names a `data_source_id`; otherwise Notion sync is off and every Notion step is skipped.
-  - `warnings` lists keys the helper ignores, and exit code 1 with an `error` means the file is broken. Say either once, in one line, and carry on (a broken file means Notion is off).
+  - `notion_*`: where pages go and how they look. `notion_enabled` is true only when `notion_data_source_id` is set; otherwise Notion sync is off and every Notion step is skipped. Lists (`notion_tags`, `notion_fixed_properties` as `Name=Value` pairs) are comma-separated, and `notion_heading_marks` holds 3 marks separated by spaces.
+  - `warnings` lists options the helper ignores, and exit code 1 with an `error` means an option is malformed. Say either once, in one line, and carry on (a malformed option means Notion is off). To change an option, the user runs `/plugin configure sdd-planner@claude-code-sdd` and starts a new session.
 - **Template:** `core/template.md`, the jam01 SDD template (commit 5dca2e5, CC0) plus front matter, section 1.6 Requirements and the record formats for Sections 3 and 4.
 - **Worked example:** `tests/fixtures/full.md`.
 - **Notion:** through whatever Notion connection the user has, the claude.ai Notion connector or a Notion MCP server. Call its tools by what they do, whatever prefix the connection gives them: `notion-search`, `notion-fetch`, `notion-create-pages`, `notion-update-page`, `notion-get-async-task`, and for review comments `notion-get-comments` and `notion-create-comment`. The user may be asked to allow each one the first time it runs. Nothing here needs `notion-query-data-sources`, which some plans do not have.
   - New pages go under the data source `notion.data_source_id`.
-  - Properties: `S props` builds them from the settings: the title (with `notion.title_prefix`), `notion.fixed_properties`, the status from `notion.status_values`, and the tags as a JSON-array string such as `"[\"Infra\", \"Kubernetes\"]"`.
+  - Properties: `S props` with the options builds them: the title (with `notion.title_prefix`), `notion.fixed_properties`, the status from `notion.status_values`, and the tags as a JSON-array string such as `"[\"Infra\", \"Kubernetes\"]"`.
   - Page icon: `notion.page_icon`, or none when it is empty.
-  - Notion on in the settings but no Notion tools in this session: say once that this session cannot sync, set `notion_pending=true` after each write, and carry on. The next session with Notion catches up.
+  - Notion on in the options but no Notion tools in this session: say once that this session cannot sync, set `notion_pending=true` after each write, and carry on. The next session with Notion catches up.
 - **Notion comments:** every reply Claude posts starts with `[sdd]`, so a later review can tell answered threads apart. Never resolve or delete a comment; the person who wrote it resolves it.
 - **Tags:** when Notion is on and `notion.tags` lists the database's options, pick only from that list. Otherwise suggest 2 to 4 short tags that fit the design.
 - **What runs today:** for an existing system, take it from the repo (Helm charts, Terraform, Kubernetes manifests, CI and deploy configuration) or ask the user. The plugin never runs cloud CLIs such as `aws` or `kubectl`.
@@ -49,7 +49,7 @@
 2. **Never invent facts.** A number, owner, name or link you do not know is written as `{{what is needed}}`, for example `{{p95 latency target}}`. Lint blocks publishing until it is filled. Put placeholders in plain text where you can. Lint also catches multi-word ones inside inline code and diagram labels, but it skips anything that looks like a Helm or Go template (`{{ .Values.x }}`), so `{{x}}` written that way is not caught.
 3. **Plain sentences.** One idea per bullet. No metaphors, no filler, no em-dash: use a period, comma, colon or parentheses.
 4. **Template length hints:** 1.1 is 2 to 4 sentences, 1.2 is one purpose sentence plus in and out lists, 1.5 is 3 to 5 sentences.
-5. **No emoji in the file.** Heading marks, when the settings set any, are added by `S render` on the way to Notion.
+5. **No emoji in the file.** Heading marks, when the options set any, are added by `S render` on the way to Notion.
 6. **Diagrams:** mermaid, `flowchart TB` for flowcharts, quoted labels when they hold punctuation, `<br>` for a line break inside a label. See `viewpoints.md`.
 7. **Tables:** normal pipe tables in the file. `S render` turns them into Notion tables.
 8. **Lists:** nested bullets are indented with 2 spaces. Soft-wrapped lines are fine; render joins them.

@@ -4,7 +4,7 @@ slug: mini
 kind: new
 version: 0.3
 status: draft
-author: Lim Eunhye
+author: eeeemune
 organization: Acme
 created: 2026-10-01
 updated: 2026-10-06
@@ -20,7 +20,7 @@ notion_pending: false
 ## For Mini example
 
 Version 0.3  
-Prepared by Lim Eunhye  
+Prepared by eeeemune  
 Acme  
 2026-10-06
 
@@ -35,7 +35,7 @@ Acme
 
 | Name | Date | Reason For Changes | Version |
 |------|------|--------------------|---------|
-| Lim Eunhye | 2026-10-01 | Initial draft | 0.1 |
+| eeeemune | 2026-10-01 | Initial draft | 0.1 |
 |      |      |                    |         |
 
 ## 1. Introduction

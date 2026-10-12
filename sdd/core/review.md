@@ -1,4 +1,4 @@
-# /sdd:review
+# /sdd-planner:review
 
 Review one SDD with the user: explain what it says, check it, and fix it together. By default the review happens on a review page on claude.ai (part 6); `walk` does it in the terminal, one section per turn. The user may be new to SDDs, so explain in plain words. Read `<plugin root>/core/rules.md` first.
 
@@ -10,13 +10,13 @@ The arguments may hold a file path and one mode word:
 - **`walk`:** the terminal review, one section per turn (parts 2 to 4).
 - **`notion`:** the comments on the Notion page (part 5).
 
-The review page needs the `Artifact` tool, and it is required: when this session does not have it, stop with one line that says so and names `/sdd:review walk`, the terminal review. Never switch to `walk` on your own.
+The review page needs the `Artifact` tool, and it is required: when this session does not have it, stop with one line that says so and names `/sdd-planner:review walk`, the terminal review. Never switch to `walk` on your own.
 
 ## 1. Find the SDD
 
 - An argument path: use it.
 - Otherwise the `*.md` files with SDD front matter in `<git root>/docs/sdd/` and `~/sdd/`, most recently changed first. Several: ask which (header "Which SDD").
-- None: ask (header "No SDD yet") Tour the template (Recommended) / Start one with /sdd:write. The tour walks `core/sections.md` in reading order (1.1 to 5), one section per turn: What it is, Why it matters, and the Example, then the options Next / Ask a question / Stop. It writes nothing.
+- None: ask (header "No SDD yet") Tour the template (Recommended) / Start one with /sdd-planner:write. The tour walks `core/sections.md` in reading order (1.1 to 5), one section per turn: What it is, Why it matters, and the Example, then the options Next / Ask a question / Stop. It writes nothing.
 
 ## 2. Overview (walk)
 
@@ -41,7 +41,7 @@ Then one question (header "<id> next"):
 
 - **Looks good, next**
 - **Apply the fix:** only when a finding has a concrete fix. The preview shows the exact new text.
-- **Rewrite with me:** runs the `/sdd:write` turn for this section (`core/author.md`, part 4).
+- **Rewrite with me:** runs the `/sdd-planner:write` turn for this section (`core/author.md`, part 4).
 - **Other** (added by the tool): a question (answer it, then show the same screen) or their own edit (show it, confirm, then write it).
 
 Every change is written with `S section <file> <id> --write` and a quoted heredoc (see `core/author.md` 4d). After writing, check the state in the JSON it prints.
@@ -50,15 +50,15 @@ Every change is written with `S section <file> <id> --write` and a quoted heredo
 
 1. **Traceability table:** each requirement, the views that implement it, and the decisions that shaped it, built from the 1.6 table and each view's Implements and Decisions lines. Flag requirements with no view.
 2. **Summary:** sections reviewed, fixes applied, and the findings still open, by section.
-3. If anything changed, run `core/sync.md` draft mode, and refresh the review page if the front matter has a `review_url` (part 6a). A published file stays published; `/sdd:publish` will record the change as a new version.
-4. If `S lint` reports no errors, suggest `/sdd:publish`. Otherwise name the errors that block it.
+3. If anything changed, run `core/sync.md` draft mode, and refresh the review page if the front matter has a `review_url` (part 6a). A published file stays published; `/sdd-planner:publish` will record the change as a new version.
+4. If `S lint` reports no errors, suggest `/sdd-planner:publish`. Otherwise name the errors that block it.
 
 ## 5. Notion comments
 
 The Notion page is regenerated from the file on every sync, but comments stay attached (the sync edits blocks in place). So people review there: open a section's toggle and comment on any line. This part turns those comments into changes to the file.
 
-1. **Notion.** Notion off in `S settings`, or no Notion tools in this session: explain how to connect and stop. Add a `notion` block with the database's `data_source_id` to the settings file (`S settings` prints its path; the README shows an example), and connect Notion in Claude Code (the claude.ai Notion connector, or a Notion MCP server).
-2. **Page.** Read `notion_page_id` with `S meta <file>`. None: say the SDD has no Notion page yet (run `/sdd:write` or a sync first) and stop.
+1. **Notion.** Notion off in `S options`, or no Notion tools in this session: explain how to connect and stop. Set the `notion_data_source_id` option to the database's data source ID with `/plugin configure sdd-planner@claude-code-sdd` (the README lists every option), start a new session, and connect Notion in Claude Code (the claude.ai Notion connector, or a Notion MCP server).
+2. **Page.** Read `notion_page_id` with `S meta <file>`. None: say the SDD has no Notion page yet (run `/sdd-planner:write` or a sync first) and stop.
 3. **Open comments.** `notion-get-comments` with `page_id` and `include_all_blocks: true`. Keep unresolved discussions, and leave out those whose last comment starts with `[sdd]` (returned escaped, as `\[sdd\]`): Claude already answered them and the reviewer has not replied since.
 4. **Where each comment belongs.**
    - `context="page"`: the whole document.
@@ -85,13 +85,13 @@ SDD_TEXT
    - changed: `[sdd] Changed in the file: <what changed, one line>. Synced <HH:MM>.`
    - reply only: `[sdd] <the answer>`
    Skipped threads get no reply. Never resolve or delete comments: the reviewer resolves them in Notion once satisfied.
-9. **Summary:** a table of comment, section and outcome (changed, answered, skipped), then: "Resolve the threads in Notion once you're happy with the changes." If `S lint` reports no errors, suggest `/sdd:publish`.
+9. **Summary:** a table of comment, section and outcome (changed, answered, skipped), then: "Resolve the threads in Notion once you're happy with the changes." If `S lint` reports no errors, suggest `/sdd-planner:publish`.
 
 ## 6. Review page
 
 A private web page on claude.ai that shows the SDD one part at a time (each section, view and ADR): the guide's note on what the part is for, plain-language notes, the part itself with its diagram drawn, the checker's findings and Claude's own check of the part, a "Check yourself" question, an Ask box that answers questions about that part, and Approve / Needs changes buttons. An "Original document" tab shows the whole SDD as written. In either tab, selecting words in the SDD text offers Comment (the platform's comment box, quoting the selection) and Suggest edit (the reviewer rewrites the selection). Verdicts and suggested edits are saved in the page's own database, so a later session can read them. The file stays the source of truth: the page is rebuilt from it after each round of fixes. Outside claude.ai the page still shows everything but cannot save verdicts.
 
-This is the default mode of `/sdd:review`. When the front matter has a `notion_page_id` and this session has Notion tools, also count the open Notion comments as in part 2; if there are any, end the run with one line: "<n> open comments on the Notion page: run `/sdd:review notion` to act on them."
+This is the default mode of `/sdd-planner:review`. When the front matter has a `notion_page_id` and this session has Notion tools, also count the open Notion comments as in part 2; if there are any, end the run with one line: "<n> open comments on the Notion page: run `/sdd-planner:review notion` to act on them."
 
 `<scratchpad>` is the session's scratchpad directory (the system prompt names it). With none, use a `.sdd-review/` folder in the working directory and tell the user they can delete it afterwards.
 
@@ -121,7 +121,7 @@ This is the default mode of `/sdd:review`. When the front matter has a `notion_p
    - No `review_url` yet: `Artifact` publish with `file_path` = the HTML, `icon: "checklist"`, `description: "Guided review of the <title> SDD: read each part, then approve it or flag what should change."`, and `capabilities: {"db": {}, "user": {"scopes": ["profile"]}, "sample": {}, "comments": {"composer_only": true}}`. Then `S meta <file> --set review_url=<url>`.
    - `review_url` set: `Artifact` publish with `file_path` and `url` = the `review_url`. Leave out `icon` and `capabilities`: the page keeps them. Saved verdicts survive a republish. A publish refused because this session has not seen the page means the read in step 1 was skipped: do it, then publish again.
 
-4. **Tell the user,** in at most 4 lines: the link; what to do there (read each part or the Original document tab, press Approve or Needs changes with a note, use Ask for questions, select words to comment on them or suggest an edit); that the page is private until they share it, and teammates they share it with can leave verdicts too; and "When you're done, run `/sdd:review` and I'll act on the verdicts."
+4. **Tell the user,** in at most 4 lines: the link; what to do there (read each part or the Original document tab, press Approve or Needs changes with a note, use Ask for questions, select words to comment on them or suggest an edit); that the page is private until they share it, and teammates they share it with can leave verdicts too; and "When you're done, run `/sdd-planner:review` and I'll act on the verdicts."
 
 ### 6b. Act on the feedback
 
@@ -149,4 +149,4 @@ This is the default mode of `/sdd:review`. When the front matter has a `notion_p
    If the batch is refused because a document changed, a reviewer saved a new verdict meanwhile: re-read that document, show what changed, and send the batch again without overwriting it.
 8. **Refresh the page:** 6a steps 1 to 3, reusing the notes and rewriting only those of the entries you changed.
 9. **Threads.** Claude can answer a comment thread only after someone pressed "Send to Claude" on it; `read` shows which ones. For each handled thread that was sent to Claude: `ArtifactComments` action `reply` with one line (`Changed: <what changed>.` or the answer), then `resolve` it if the file changed for it. Leave answered questions open so the reviewer sees the answer. Threads not sent to Claude get neither: list them for the user ("Still open, not sent to Claude: <entry>: <first 40 characters>") so they can resolve them on the page.
-10. **Summary:** a table of entry, feedback and outcome (changed, answered, applied, declined, skipped). Then: "Open the page to re-check the changed parts: <link>." If every entry is approved and `S lint` reports no errors, suggest `/sdd:publish`.
+10. **Summary:** a table of entry, feedback and outcome (changed, answered, applied, declined, skipped). Then: "Open the page to re-check the changed parts: <link>." If every entry is approved and `S lint` reports no errors, suggest `/sdd-planner:publish`.

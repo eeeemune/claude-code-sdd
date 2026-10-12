@@ -6,7 +6,7 @@ You are guiding someone who is new to Software Design Descriptions through one S
 
 ## 1. Start or resume
 
-`/sdd:write` passes its arguments here.
+`/sdd-planner:write` passes its arguments here.
 
 - A path to an existing `.md` file: resume that file.
 - `new <title>`, or a description of what to design: start a new SDD with it.
@@ -15,11 +15,11 @@ You are guiding someone who is new to Software Design Descriptions through one S
   - Several: ask which, showing up to 3 of the most recently changed plus "Start a new SDD".
   - None: start a new SDD.
 
-**Resume:** run `S settings` (step 2.1), run `S status <file>`, run the drift check in `sync.md`, gather context (step 3), print one line ("<title>: <done> of 11 sections done, next is <id> <title>"), then continue the loop (step 4) at `next`.
+**Resume:** run `S options` (step 2.1), run `S status <file>`, run the drift check in `sync.md`, gather context (step 3), print one line ("<title>: <done> of 11 sections done, next is <id> <title>"), then continue the loop (step 4) at `next`.
 
 ## 2. Setup (new SDD only)
 
-1. Run `S settings` once. Notion off: say once "Notion sync is off, so the markdown file is the whole SDD. To sync to a Notion database, add a `notion` block to <path>." A `warnings` entry or an `error`: say it once, in one line.
+1. Run `S options` with the options once. Notion off: say once "Notion sync is off, so the markdown file is the whole SDD. To sync to a Notion database, set the Notion options with `/plugin configure sdd-planner@claude-code-sdd`." A `warnings` entry or an `error`: say it once, in one line.
 2. If there is no description yet, ask in chat: "What are you designing? One or two sentences, plus any links (Asana, Slack, Notion, repo)." Wait for the answer.
 3. Propose a title of 3 to 6 words and a slug (rules in `rules.md`). When Notion is on, search the user's database for related pages: `notion-search` with the title keywords and `collection://<notion.data_source_id>`.
 4. One question screen:
@@ -27,8 +27,8 @@ You are guiding someone who is new to Software Design Descriptions through one S
    - **File** (header "File"), only inside a git repo: `<git root>/docs/sdd/<slug>.md` (Recommended) / `~/sdd/<slug>.md`. Outside a repo there is only one place, and a question needs two options, so leave it out and say where the file goes.
    - **Tags** (header "Tags", multiSelect): 4 tags that fit, following the tag rule in `rules.md`.
    - **Related** (header "Related"): up to 3 pages the search found, or "None". Leave this question out when there was no search or it found nothing.
-5. Create the file: `S new --title "<title>" --slug <slug> --kind <kind> --author "<git config user.name>" --tags "<a,b>" --links "<urls, including a picked related page>" --out <path>`. Without `--org`, the title block takes `organization` from the settings (or has no organization line). Pass `--org "<org>"` only when the repo or the description names a different one. Without git, ask for the author name in chat.
-6. Print the 11 sections in writing order, one line each, then: "For each section I explain it, draft 2 or 3 options, and you pick. Type pause at any question to stop; /sdd:write picks up where you left off."
+5. Create the file: `S new --title "<title>" --slug <slug> --kind <kind> --author "<git config user.name>" --tags "<a,b>" --links "<urls, including a picked related page>" --out <path>`. Run it with the options: without `--org`, the title block takes `organization` from them (or has no organization line). Pass `--org "<org>"` only when the repo or the description names a different one. Without git, ask for the author name in chat.
+6. Print the 11 sections in writing order, one line each, then: "For each section I explain it, draft 2 or 3 options, and you pick. Type pause at any question to stop; /sdd-planner:write picks up where you left off."
 
 ## 3. Gather context (read-only, once per session)
 
@@ -79,7 +79,7 @@ Sections 2.2, 3 and 4, plus 1.4 and 1.3, have their own screens (step 5).
 - **A draft with notes:** apply the notes as edits, show the result once, then ask (header "Write?"): Write it / Edit more.
 - **Other, with a question:** answer it in 2 to 6 lines, then show the same screen again.
 - **Other, with their own text:** clean it up to the writing rules, show it, then ask: Write it / Edit more.
-- **Other, "pause":** print "Saved. Stopped at <id>. Run /sdd:write to continue." and stop the loop.
+- **Other, "pause":** print "Saved. Stopped at <id>. Run /sdd-planner:write to continue." and stop the loop.
 - **Skip for now:** write the TODO line.
 
 Nothing is written until one of these ends in a pick or a yes.
@@ -135,7 +135,7 @@ When `S status` reports no `todo` sections:
 
 1. Skipped sections: list them and ask (header "Skipped") Fill them now / Leave them for later.
 2. Run `S lint <file>` and explain errors and warnings in plain words, with the fix for each.
-3. Next steps: `/sdd:review` to check it on a review page (or `/sdd:review walk` in the terminal), then `/sdd:publish` to version it (and finalize it in Notion when Notion is on).
+3. Next steps: `/sdd-planner:review` to check it on a review page (or `/sdd-planner:review walk` in the terminal), then `/sdd-planner:publish` to version it (and finalize it in Notion when Notion is on).
 4. One line on spec-driven development: build against this file, and use the 1.6 acceptance checks as the verify steps.
 
 ## Red flags: stop and correct

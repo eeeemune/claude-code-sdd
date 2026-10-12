@@ -5,7 +5,7 @@ Commands (JSON output unless noted):
   new      create an SDD file from core/template.md
   status   state of every section and the next one in writing order
   lint     findings, exit 1 on errors; --fix rewrites LR/RL diagrams to TB
-  settings the user's settings merged with the defaults; exit 1 when the file is broken
+  options  the plugin options block (stdin) merged with the defaults; exit 1 when an option is malformed
   render   Notion-flavored markdown (stdout, not JSON)
   props    Notion page properties
   meta     read front matter, or update keys with --set k=v
@@ -25,7 +25,6 @@ import argparse
 import html as html_lib
 import datetime as dt
 import json
-import os
 import re
 import sys
 from difflib import SequenceMatcher
@@ -1192,7 +1191,7 @@ def review_page(text: str, notes: dict, source_label: str, guide: dict | None = 
             findings_html += f'<div class="findings claude"><p class="label">What Claude found</p><ul>{rows}</ul></div>'
         nxt = entries[k + 1] if k + 1 < len(entries) else None
         next_html = (f'<a class="next" href="#{_anchor_id(nxt["id"])}">Next: {esc(nxt["id"])} {esc(nxt["title"])}</a>'
-                     if nxt else '<p class="next done">That was the last part. Run /sdd:review in Claude Code to act on your verdicts.</p>')
+                     if nxt else '<p class="next done">That was the last part. Run /sdd-planner:review in Claude Code to act on your verdicts.</p>')
         sections.append(f"""<section class="entry" id="{anchor}" data-id="{esc(e["id"])}">
 <p class="eyebrow">{' <span class="dot">&middot;</span> '.join(eyebrow)}</p>
 <h2>{esc(e["title"])}</h2>
@@ -1304,12 +1303,6 @@ SETTINGS_DEFAULTS = {
 _TYPE_NAMES = {str: "a string", list: "a list of strings", dict: "an object of strings"}
 
 
-def config_dir() -> Path:
-    """The Claude config folder: $CLAUDE_CONFIG_DIR, or ~/.claude when it is not set."""
-    env = os.environ.get("CLAUDE_CONFIG_DIR")
-    return Path(env).expanduser() if env else Path.home() / ".claude"
-
-
 def _well_typed(value, default) -> bool:
     if not isinstance(value, type(default)):
         return False
@@ -1355,22 +1348,68 @@ def settings_from(raw) -> dict:
     return out
 
 
-def load_settings(folder: Path | None = None) -> dict:
-    """Read <config>/sdd/settings.json. A missing file means the defaults; a broken one is reported and Notion is off."""
-    path = (folder or config_dir()) / "sdd" / "settings.json"
-    found = path.exists()
-    if not found:
-        merged = settings_from({})
-    else:
-        try:
-            merged = settings_from(json.loads(path.read_text(encoding="utf-8")))
-        except json.JSONDecodeError as error:
-            merged = settings_from({})
-            merged["error"] = f"not valid JSON: {error.msg} at line {error.lineno}, column {error.colno}"
-            merged["notion_enabled"] = False
-    if merged["error"]:
-        merged["error"] = f"{path}: {merged['error']}"
-    return {"path": str(path), "found": found, **merged}
+# Plugin options (userConfig) as Claude Code substitutes them into the skills: one key=value line each.
+# Lists are comma-separated; a value that still reads ${user_config...} was never set.
+OPTION_KEYS = (
+    "organization", "notion_data_source_id", "notion_title_property", "notion_title_prefix",
+    "notion_status_property", "notion_status_draft", "notion_status_published", "notion_tags_property",
+    "notion_tags", "notion_fixed_properties", "notion_heading_marks", "notion_page_icon",
+)
+
+
+def parse_options(text: str) -> tuple[dict, list[str]]:
+    values, warnings = {}, []
+    for line in text.splitlines():
+        key, sep, value = line.partition("=")
+        key, value = key.strip(), value.strip()
+        if not sep or not key:
+            continue
+        if key not in OPTION_KEYS:
+            warnings.append(f"unknown option '{key}' is ignored")
+            continue
+        values[key] = "" if "${user_config." in value else value
+    return values, warnings
+
+
+def load_options(text: str) -> dict:
+    """The options block merged with the defaults. Malformed options are an error, and errors turn Notion off."""
+    values, warnings = parse_options(text)
+    errors = []
+    notion = {}
+    for name in ("data_source_id", "title_property", "title_prefix", "status_property", "tags_property", "page_icon"):
+        if values.get(f"notion_{name}"):
+            notion[name] = values[f"notion_{name}"]
+    status = {state: values[f"notion_status_{state}"] for state in ("draft", "published") if values.get(f"notion_status_{state}")}
+    if status:
+        notion["status_values"] = status
+    if values.get("notion_tags"):
+        notion["tags"] = [tag.strip() for tag in values["notion_tags"].split(",") if tag.strip()]
+    if values.get("notion_fixed_properties"):
+        fixed = {}
+        for pair in values["notion_fixed_properties"].split(","):
+            name, sep, value = pair.partition("=")
+            if not sep or not name.strip():
+                errors.append("notion_fixed_properties must be Name=Value pairs separated by commas")
+                fixed = {}
+                break
+            fixed[name.strip()] = value.strip()
+        if fixed:
+            notion["fixed_properties"] = fixed
+    if values.get("notion_heading_marks"):
+        marks = values["notion_heading_marks"].split()
+        if len(marks) == 3:
+            notion["heading_marks"] = marks
+        else:
+            errors.append("notion_heading_marks must list 3 marks separated by spaces, one per heading level")
+    raw = {"notion": notion}
+    if values.get("organization"):
+        raw["organization"] = values["organization"]
+    merged = settings_from(raw)
+    merged["warnings"] = warnings + merged["warnings"]
+    if errors:
+        merged["error"] = "; ".join([e for e in [merged["error"], *errors] if e])
+        merged["notion_enabled"] = False
+    return merged
 
 
 # ---------------------------------------------------------------- props, revisions, release, new
@@ -1379,7 +1418,9 @@ def props(text: str, settings: dict | None = None) -> dict:
     """Notion page properties, named and filled as the settings say. By default only the title is set."""
     notion = (settings or settings_from({}))["notion"]
     fm = parse_front_matter(text)
-    out = {notion["title_property"]: f"{notion['title_prefix']}{fm.get('title', '')}"}
+    prefix = notion["title_prefix"].strip()
+    title = str(fm.get("title", ""))
+    out = {notion["title_property"]: f"{prefix} {title}" if prefix else title}
     out.update(notion["fixed_properties"])
     state = "published" if fm.get("status") == "published" else "draft"
     if notion["status_property"] and state in notion["status_values"]:
@@ -1473,6 +1514,16 @@ def _print_json(data) -> None:
     print(json.dumps(data, indent=2, ensure_ascii=False))
 
 
+def _options(args) -> dict:
+    """The plugin options for this command: the block on stdin with --options -, otherwise the defaults."""
+    given = getattr(args, "options", None)
+    if given is None:
+        return load_options("")
+    if given != "-":
+        raise SddError("--options takes - and reads the options block from stdin")
+    return load_options(sys.stdin.read())
+
+
 def _csv(value: str | None) -> list[str]:
     return [item.strip() for item in (value or "").split(",") if item.strip()]
 
@@ -1486,7 +1537,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--slug", required=True)
     p.add_argument("--kind", required=True, help="new | existing | change")
     p.add_argument("--author", required=True)
-    p.add_argument("--org", help="default: organization from the settings file")
+    p.add_argument("--org", help="default: organization from the plugin options")
+    p.add_argument("--options", help="- to read the plugin options block from stdin")
     p.add_argument("--tags", help="comma-separated Notion tags")
     p.add_argument("--links", help="comma-separated URLs")
     p.add_argument("--date", help="YYYY-MM-DD, default today")
@@ -1500,12 +1552,15 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--fix", action="store_true", help="rewrite mermaid LR/RL to TB in place first")
 
     p = sub.add_parser("render", help="print the Notion-flavored markdown")
+    p.add_argument("--options", help="- to read the plugin options block from stdin")
     p.add_argument("file")
     p.add_argument("--source", help="path shown in the page's header callout")
 
-    sub.add_parser("settings", help="print the settings merged with the defaults; exit 1 when the file is broken")
+    p = sub.add_parser("options", help="print the plugin options merged with the defaults; exit 1 when one is malformed")
+    p.add_argument("--options", help="- to read the options block (key=value lines) from stdin")
 
     p = sub.add_parser("props", help="print the Notion page properties")
+    p.add_argument("--options", help="- to read the plugin options block from stdin")
     p.add_argument("file")
 
     p = sub.add_parser("meta", help="print front matter, or update keys")
@@ -1550,7 +1605,7 @@ def main(argv: list[str] | None = None) -> int:
             out = Path(args.out)
             if out.exists():
                 raise SddError(f"{out} already exists; refusing to overwrite")
-            org = args.org if args.org is not None else load_settings()["organization"]
+            org = args.org if args.org is not None else _options(args)["organization"]
             text = new_document(args.title, args.slug, args.kind, args.author, org,
                                 _csv(args.tags), _csv(args.links), args.date or today)
             out.parent.mkdir(parents=True, exist_ok=True)
@@ -1573,11 +1628,11 @@ def main(argv: list[str] | None = None) -> int:
             return 1 if counts["error"] else 0
         elif args.command == "render":
             sys.stdout.write(render(_read(args.file), args.source or default_source_label(Path(args.file)),
-                                    settings=load_settings()))
+                                    settings=_options(args)))
         elif args.command == "props":
-            _print_json(props(_read(args.file), load_settings()))
-        elif args.command == "settings":
-            current = load_settings()
+            _print_json(props(_read(args.file), _options(args)))
+        elif args.command == "options":
+            current = _options(args)
             _print_json(current)
             return 1 if current["error"] else 0
         elif args.command == "meta":

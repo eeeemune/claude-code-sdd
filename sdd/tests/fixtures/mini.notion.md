@@ -1,5 +1,5 @@
 <callout color="gray_bg">
-	**Version** 0.3 · **Status** Draft · **Author** Lim Eunhye · **Updated** 2026-10-06
+	**Version** 0.3 · **Status** Draft · **Author** eeeemune · **Updated** 2026-10-06
 	Generated from `fixtures/mini.md`. Edit that file, not this page: every sync rewrites the text here. Comments stay.
 	To review, open one section at a time and comment on any line.
 </callout>
@@ -13,7 +13,7 @@
 		<td>Version</td>
 	</tr>
 	<tr>
-		<td>Lim Eunhye</td>
+		<td>eeeemune</td>
 		<td>2026-10-01</td>
 		<td>Initial draft</td>
 		<td>0.1</td>

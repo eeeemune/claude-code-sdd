@@ -6,7 +6,7 @@ Run from the `sdd/` folder:
 python3 -m unittest discover -s tests -v
 ```
 
-The suite uses the standard library only and passes on Python 3.9 to 3.14. Tests that run the CLI point `CLAUDE_CONFIG_DIR` at an empty folder, so your own `sdd/settings.json` never changes their results.
+The suite uses the standard library only and passes on Python 3.9 to 3.14. Commands that take plugin options get them as an options block on stdin (`--options -`), so nothing on your machine changes their results.
 
 ## Fixtures
 
@@ -14,17 +14,17 @@ The suite uses the standard library only and passes on Python 3.9 to 3.14. Tests
 - `fixtures/partial.md`: 1.2 and 1.6 written, 2.1 skipped with a TODO, 5 not applicable, everything else still the template. Its Sections 3 and 4 keep the commented record skeletons, which must never be read as real views or decisions.
 - `fixtures/bad.md`: exactly one violation per lint rule.
 - `fixtures/mini.md` and `fixtures/mini.notion.md`: a small input and its expected Notion render with heading marks, written by hand before `render` existed.
-- `fixtures/settings-notion.json`: settings with every Notion key set (title prefix, status values, tags, a fixed property, heading marks), with a placeholder data source ID.
+- `fixtures/options-notion.txt`: an options block with every Notion option set (title prefix, status values, tags, a fixed property, heading marks), with a placeholder data source ID.
 
 ## Notion render check
 
-Needs a Notion database of your own and its `data_source_id` in your settings. Sync `fixtures/full.md` to a test page, fetch it, and run the final-mode checks in `core/sync.md`.
+Needs a Notion database of your own and its ID in the `notion_data_source_id` option. Sync `fixtures/full.md` to a test page, fetch it, and run the final-mode checks in `core/sync.md`.
 
 Result on 2026-10-06, with heading marks set: 6 / 14 / 4 marked headings, 5 tables, 4 mermaid diagrams, table of contents and callout present, no literal `\n`, properties right. A second identical sync left the page unchanged. A block comment and a page comment both survived a sync, including one that changed the commented paragraph (the block was edited in place).
 
 ## Notion comment check
 
-On 2026-10-07, two comments on the render-check page (one on a V4 paragraph, one asking "why 10 minutes" on R1) went through `/sdd:review notion`: the first changed the file, the second got a reply. Both replies were posted, both comments survived the re-sync, and the V4 block was updated in place. Two things the run showed: a comment inside a section is often anchored to the toggle heading itself, and Notion returns comment text starting `[sdd]` escaped as `\[sdd\]`.
+On 2026-10-07, two comments on the render-check page (one on a V4 paragraph, one asking "why 10 minutes" on R1) went through `/sdd-planner:review notion`: the first changed the file, the second got a reply. Both replies were posted, both comments survived the re-sync, and the V4 block was updated in place. Two things the run showed: a comment inside a section is often anchored to the toggle heading itself, and Notion returns comment text starting `[sdd]` escaped as `\[sdd\]`.
 
 ## Review page check
 
