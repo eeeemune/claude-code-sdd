@@ -4,9 +4,9 @@
 
 ## Demo
 
-This plugin was designed with itself. Below is the review page for the SDD of its own public release, right after Claude acted on the first round of feedback: green parts are approved, and blue parts were changed by Claude and wait for a re-check, each with a line saying what changed.
+This plugin was designed with itself. Below is the review page for the SDD of its own public release, right after the rename to sdd-planner: green parts were approved and did not change, blue parts were changed by Claude and wait for a re-check, each with a line saying what changed, and the two new decisions are still open.
 
-![The review page for this plugin's own release SDD after the first round of fixes: 13 parts approved, 12 waiting for a re-check](docs/review-page-recheck.png)
+![The review page for this plugin's own release SDD after the rename: 4 parts approved, 22 waiting for a re-check, 2 new decisions open](docs/review-page-v2.png)
 
 ## Install
 
