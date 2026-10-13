@@ -10,7 +10,7 @@
   - `notion_*`: where pages go and how they look. `notion_enabled` is true only when `notion_data_source_id` is set; otherwise Notion sync is off and every Notion step is skipped. Lists (`notion_tags`, `notion_fixed_properties` as `Name=Value` pairs) are comma-separated, and `notion_heading_marks` holds 3 marks separated by spaces.
   - `warnings` lists options the helper ignores, and exit code 1 with an `error` means an option is malformed. Say either once, in one line, and carry on (a malformed option means Notion is off). To change an option, the user runs `/plugin configure sdd-planner@claude-code-sdd` and starts a new session.
 - **Template:** `core/template.md`, the jam01 SDD template (commit 5dca2e5, CC0) plus front matter, section 1.6 Requirements and the record formats for Sections 3 and 4.
-- **Worked example:** `tests/fixtures/full.md`.
+- **Worked example:** `examples/preview-envs.md`.
 - **Notion:** through whatever Notion connection the user has, the claude.ai Notion connector or a Notion MCP server. Call its tools by what they do, whatever prefix the connection gives them: `notion-search`, `notion-fetch`, `notion-create-pages`, `notion-update-page`, `notion-get-async-task`, and for review comments `notion-get-comments` and `notion-create-comment`. The user may be asked to allow each one the first time it runs. Nothing here needs `notion-query-data-sources`, which some plans do not have.
   - New pages go under the data source `notion.data_source_id`.
   - Properties: `S props` with the options builds them: the title (with `notion.title_prefix`), `notion.fixed_properties`, the status from `notion.status_values`, and the tags as a JSON-array string such as `"[\"Infra\", \"Kubernetes\"]"`.

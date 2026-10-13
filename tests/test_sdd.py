@@ -15,9 +15,10 @@ from collections import Counter
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent
+ROOT = HERE.parent / "sdd"
 SCRIPT = ROOT / "scripts" / "sdd.py"
 FIX = HERE / "fixtures"
+EXAMPLE = ROOT / "examples" / "preview-envs.md"
 
 WALK_ORDER = ["1.2", "1.6", "1.1", "2.1", "2.2", "3", "4", "5", "1.4", "1.3", "1.5"]
 VIEWPOINTS = [
@@ -46,7 +47,7 @@ def sdd():
 
 
 def read(name):
-    return (FIX / name).read_text(encoding="utf-8")
+    return (EXAMPLE if name == "full.md" else FIX / name).read_text(encoding="utf-8")
 
 
 def run_cli(*args, stdin=None):
@@ -295,7 +296,7 @@ class LintTests(unittest.TestCase):
 
     def test_lint_cli_exit_codes(self):
         self.assertEqual(run_cli("lint", FIX / "bad.md").returncode, 1)
-        self.assertEqual(run_cli("lint", FIX / "full.md").returncode, 0)
+        self.assertEqual(run_cli("lint", EXAMPLE).returncode, 0)
 
 
 TEST_GUIDE = {
@@ -481,11 +482,11 @@ class OptionsTests(unittest.TestCase):
 
     def test_render_and_props_cli_take_the_options(self):
         block = read("options-notion.txt")
-        r = run_cli("props", FIX / "full.md", "--options", "-", stdin=block)
+        r = run_cli("props", EXAMPLE, "--options", "-", stdin=block)
         self.assertEqual(json.loads(r.stdout)["Name"], "SDD: Per-PR preview environments")
-        r = run_cli("render", FIX / "full.md", "--options", "-", stdin=block)
+        r = run_cli("render", EXAMPLE, "--options", "-", stdin=block)
         self.assertIn("## \U0001F49B 1.6 Requirements", r.stdout)
-        r = run_cli("render", FIX / "full.md")
+        r = run_cli("render", EXAMPLE)
         self.assertIn("## 1.6 Requirements", r.stdout)
 
     def test_author_option(self):
@@ -593,11 +594,11 @@ class LocateTests(unittest.TestCase):
 
     def test_no_match(self):
         self.assertIsNone(self.hit("completely unrelated text about bananas and submarines"))
-        r = run_cli("locate", FIX / "full.md", "--text", "completely unrelated text about bananas and submarines")
+        r = run_cli("locate", EXAMPLE, "--text", "completely unrelated text about bananas and submarines")
         self.assertEqual(r.returncode, 3)
 
     def test_cli(self):
-        r = run_cli("locate", FIX / "full.md", "--text", "R2 An environment is deleted within 1 hour")
+        r = run_cli("locate", EXAMPLE, "--text", "R2 An environment is deleted within 1 hour")
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(json.loads(r.stdout)["section"], "1.6")
 
@@ -638,7 +639,7 @@ class ReviewDataTests(unittest.TestCase):
         self.assertTrue(all(not e["findings"] for e in sdd().review_data(read("full.md"))["entries"]))
 
     def test_cli_prints_json(self):
-        r = run_cli("review-data", FIX / "full.md")
+        r = run_cli("review-data", EXAMPLE)
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(len(json.loads(r.stdout)["entries"]), 15)
 
@@ -699,7 +700,7 @@ class ReviewPageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             notes, out = Path(d) / "notes.json", Path(d) / "page.html"
             notes.write_text(json.dumps(SAMPLE_NOTES), encoding="utf-8")
-            r = run_cli("review-page", FIX / "full.md", "--notes", notes, "--out", out)
+            r = run_cli("review-page", EXAMPLE, "--notes", notes, "--out", out)
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertIn('<section class="entry"', out.read_text(encoding="utf-8"))
 
@@ -735,7 +736,7 @@ class ReviewPageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             notes, out, doc = Path(d) / "notes.json", Path(d) / "page.html", Path(d) / "doc.md"
             notes.write_text(json.dumps(SAMPLE_NOTES), encoding="utf-8")
-            run_cli("review-page", FIX / "full.md", "--notes", notes, "--out", out)
+            run_cli("review-page", EXAMPLE, "--notes", notes, "--out", out)
             doc.write_text(read("full.md").replace("It is prescriptive: the system is built from it.", "Changed."),
                            encoding="utf-8")
             r = run_cli("review-changed", out, doc)
@@ -752,11 +753,11 @@ class ReviewPageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             notes, out = Path(d) / "notes.json", Path(d) / "page.html"
             notes.write_text(json.dumps(SAMPLE_NOTES), encoding="utf-8")
-            run_cli("review-page", FIX / "full.md", "--notes", notes, "--out", out)
+            run_cli("review-page", EXAMPLE, "--notes", notes, "--out", out)
             r = run_cli("review-notes", out)
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertEqual(json.loads(r.stdout), SAMPLE_NOTES)
-            r = run_cli("review-notes", FIX / "full.md")
+            r = run_cli("review-notes", EXAMPLE)
             self.assertEqual(r.returncode, 2)
             self.assertIn("not a review page", r.stderr)
 

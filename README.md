@@ -83,7 +83,7 @@ Claude Code keeps the options per account and hands them to the plugin's command
 
 ## The worked example
 
-[`sdd/tests/fixtures/full.md`](sdd/tests/fixtures/full.md) is a complete SDD for per-PR preview environments on EKS: scope, four requirements with runnable checks, four views with diagrams, and two decisions. The section guide (`sdd/core/sections.md`) draws its examples from it.
+[`sdd/examples/preview-envs.md`](sdd/examples/preview-envs.md) is a complete SDD for per-PR preview environments on EKS: scope, four requirements with runnable checks, four views with diagrams, and two decisions. The section guide (`sdd/core/sections.md`) draws its examples from it.
 
 ## Layout
 
@@ -103,7 +103,8 @@ sdd/                              the plugin sdd-planner
   review-page/template.html       the review page
   scripts/sdd.py                  new, status, lint, render, props, options, meta, section, locate,
                                   review-data, review-page, review-notes, review-changed, release
-  tests/                          unittest suite, fixtures, and notes on the live checks
+  examples/preview-envs.md        the worked example
+tests/                            unittest suite, fixtures, and notes on the live checks (not part of the plugin)
 ```
 
 ## Develop
@@ -111,7 +112,7 @@ sdd/                              the plugin sdd-planner
 ```bash
 git clone https://github.com/eeeemune/claude-code-sdd
 claude plugin marketplace add ./claude-code-sdd    # read in place: edits apply after /reload-plugins
-cd claude-code-sdd/sdd && python3 -m unittest discover -s tests -v
+cd claude-code-sdd && python3 -m unittest discover -s tests -v
 ```
 
 ## License

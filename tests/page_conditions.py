@@ -1,7 +1,7 @@
 """R8: open the review page in every condition it can be opened in, in headless Chrome, and check what it shows.
 
 Usage, from the sdd/ folder:
-    python3 tests/page_conditions.py [--sdd tests/fixtures/full.md] [--chrome PATH]
+    python3 tests/page_conditions.py [--sdd sdd/examples/preview-envs.md] [--chrome PATH]
 
 Each condition replaces the claude.ai runtime with a stand-in that grants or refuses one capability, opens the page,
 and reads back what is visible: every part's text and diagram source, which controls are enabled or hidden, the notice,
@@ -19,7 +19,7 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SDD = HERE.parent / "scripts" / "sdd.py"
+SDD = HERE.parent / "sdd" / "scripts" / "sdd.py"
 CHROME_CANDIDATES = [
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "google-chrome", "google-chrome-stable", "chromium", "chromium-browser",
@@ -112,7 +112,7 @@ def expected(name: str, grant: dict, n: int) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("--sdd", default=str(HERE / "fixtures" / "full.md"))
+    parser.add_argument("--sdd", default=str(HERE.parent / "sdd" / "examples" / "preview-envs.md"))
     parser.add_argument("--chrome")
     args = parser.parse_args()
     chrome = find_chrome(args.chrome)

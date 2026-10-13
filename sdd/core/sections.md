@@ -7,7 +7,7 @@ One block per section, in writing order. Each block feeds one section turn:
 - the question screen follows **Choice type**;
 - `/sdd-planner:review` judges the section with **Review checks**.
 
-The running example is per-PR preview environments on EKS. The complete document is `tests/fixtures/full.md` in this plugin; show it when someone asks "what does a finished one look like?".
+The running example is per-PR preview environments on EKS. The complete document is `examples/preview-envs.md` in this plugin; show it when someone asks "what does a finished one look like?".
 
 Writing order is not reading order. Scope and requirements come first because everything else is judged against them. The glossary, references and overview come last because only then is it known which terms and links the document uses.
 
