@@ -20,6 +20,7 @@ The options set with `/plugin configure sdd-planner@claude-code-sdd`, one per li
 
 ```text
 organization=${user_config.organization}
+author=${user_config.author}
 notion_data_source_id=${user_config.notion_data_source_id}
 notion_title_property=${user_config.notion_title_property}
 notion_title_prefix=${user_config.notion_title_prefix}

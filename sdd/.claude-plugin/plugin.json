@@ -1,7 +1,7 @@
 {
   "name": "sdd-planner",
   "displayName": "SDD Planner",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Plan software with Software Design Descriptions (IEEE 1016): write one section at a time, review on a claude.ai page, publish with optional Notion sync",
   "author": {
     "name": "eeeemune",
@@ -23,6 +23,11 @@
       "type": "string",
       "title": "Organization",
       "description": "Shown in each new SDD's title block. Leave empty for none."
+    },
+    "author": {
+      "type": "string",
+      "title": "Author name",
+      "description": "Your name on each new SDD and on the Revision History rows you add. Leave empty and Claude asks for it when you start an SDD."
     },
     "notion_data_source_id": {
       "type": "string",

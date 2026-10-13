@@ -27,7 +27,7 @@ claude plugin install sdd-planner@claude-code-sdd
 
 ## What it runs and sends
 
-- **On your machine:** the commands run the plugin's helper, `python3 scripts/sdd.py`, which uses the Python standard library only and makes no network calls. It creates, checks and renders the SDD file. The SDD is written to `docs/sdd/` in the current git repo, or to `~/sdd/`. Claude reads the plugin options Claude Code stores for it, `git config user.name`, and, to draft sections, files in the current repo such as READMEs, manifests, and CI and deploy configuration.
+- **On your machine:** the commands run the plugin's helper, `python3 scripts/sdd.py`, which uses the Python standard library only and makes no network calls. It creates, checks and renders the SDD file. The SDD is written to `docs/sdd/` in the current git repo, or to `~/sdd/`. Claude reads the plugin options Claude Code stores for it and, to draft sections, files in the current repo such as READMEs, manifests, and CI and deploy configuration. The author name on an SDD comes from the `author` option, or Claude asks you for it.
 - **Links you give it:** read with the connectors your session already has, such as Notion, Slack or Asana. Nothing is written to them, apart from Notion as described next.
 - **Notion, only when your options name a database:** creates and updates the SDD's page in that database, and reads and replies to comments on it, through your own Notion connection.
 - **claude.ai review page, with `/sdd-planner:review`:** publishes the SDD's text and Claude's notes as a private page in your claude.ai account, and reads the verdicts, suggested edits and comments saved on it. The page's Ask box sends one part of the SDD and your question to Claude. Only you, and people you share the page with, can open it. The page loads its fonts from Google Fonts.
@@ -35,7 +35,7 @@ claude plugin install sdd-planner@claude-code-sdd
 
 ## Options
 
-Everything works without options, with Notion sync off. To sync to Notion or set an organization, run `/plugin configure sdd-planner@claude-code-sdd`, then start a new session. The [repository README](https://github.com/eeeemune/claude-code-sdd#options) lists every option.
+Everything works without options, with Notion sync off. To set your author name or organization, or to sync to Notion, run `/plugin configure sdd-planner@claude-code-sdd`, then start a new session. The [repository README](https://github.com/eeeemune/claude-code-sdd#options) lists every option.
 
 ## License
 

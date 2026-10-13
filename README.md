@@ -57,6 +57,7 @@ Everything works without options, with Notion sync off. To set them, run `/plugi
 claude plugin configure sdd-planner@claude-code-sdd --values-stdin <<'JSON'
 {
   "organization": "Acme",
+  "author": "Ada Lovelace",
   "notion_data_source_id": "00000000-0000-0000-0000-000000000000",
   "notion_title_prefix": "SDD:",
   "notion_tags_property": "Tags",
@@ -70,6 +71,7 @@ Claude Code keeps the options per account and hands them to the plugin's command
 | Option | Default | Meaning |
 |--------|---------|---------|
 | `organization` | none | Shown in the SDD's title block |
+| `author` | none | Your name on each new SDD and on the Revision History rows you add. Without it, Claude asks for the name when you start an SDD |
 | `notion_data_source_id` | none | The database (data source) new pages go into. Without it, Notion sync is off |
 | `notion_title_property` | `Name` | The page title property |
 | `notion_title_prefix` | none | Put before each page title, followed by a space, for example `SDD:` |

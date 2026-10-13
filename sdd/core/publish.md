@@ -18,7 +18,7 @@ Finalize one SDD: check it and version it. When Notion is on, also write it to N
 5. **Release.**
    - Suggest the reason: "First published version" on a first publish; otherwise a summary of what changed since the last Revision History row (the file's git diff when it is in a repo, else the sections changed in this session).
    - Ask (header "Reason") with the suggestion as the first option; the user can type their own in Other.
-   - Run `S release <file> --reason "<reason>" --author "<git config user.name>"`.
+   - Run `S release <file> --reason "<reason>"` with the options. The Revision History row names the `author` option, or the file's author when that is empty.
 6. **Sync in final mode** (`core/sync.md`), including the read-back checks. Notion off: skip this step.
 7. **Report:**
    - the version change (for example 0.4 to 1.0);

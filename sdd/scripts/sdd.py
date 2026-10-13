@@ -1287,6 +1287,7 @@ def page_changes(page: str, text: str) -> dict:
 # Every key is optional. Without a "notion" block (or its data_source_id) Notion sync is off.
 SETTINGS_DEFAULTS = {
     "organization": "",
+    "author": "",
     "notion": {
         "data_source_id": "",
         "title_property": "Name",
@@ -1351,7 +1352,7 @@ def settings_from(raw) -> dict:
 # Plugin options (userConfig) as Claude Code substitutes them into the skills: one key=value line each.
 # Lists are comma-separated; a value that still reads ${user_config...} was never set.
 OPTION_KEYS = (
-    "organization", "notion_data_source_id", "notion_title_property", "notion_title_prefix",
+    "organization", "author", "notion_data_source_id", "notion_title_property", "notion_title_prefix",
     "notion_status_property", "notion_status_draft", "notion_status_published", "notion_tags_property",
     "notion_tags", "notion_fixed_properties", "notion_heading_marks", "notion_page_icon",
 )
@@ -1402,8 +1403,9 @@ def load_options(text: str) -> dict:
         else:
             errors.append("notion_heading_marks must list 3 marks separated by spaces, one per heading level")
     raw = {"notion": notion}
-    if values.get("organization"):
-        raw["organization"] = values["organization"]
+    for key in ("organization", "author"):
+        if values.get(key):
+            raw[key] = values[key]
     merged = settings_from(raw)
     merged["warnings"] = warnings + merged["warnings"]
     if errors:
@@ -1536,7 +1538,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--title", required=True)
     p.add_argument("--slug", required=True)
     p.add_argument("--kind", required=True, help="new | existing | change")
-    p.add_argument("--author", required=True)
+    p.add_argument("--author", help="default: author from the plugin options")
     p.add_argument("--org", help="default: organization from the plugin options")
     p.add_argument("--options", help="- to read the plugin options block from stdin")
     p.add_argument("--tags", help="comma-separated Notion tags")
@@ -1595,7 +1597,8 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("release", help="bump the version, mark published, add a revision row")
     p.add_argument("file")
     p.add_argument("--reason", required=True)
-    p.add_argument("--author", help="default: the author in front matter")
+    p.add_argument("--author", help="default: author from the plugin options, else the author in front matter")
+    p.add_argument("--options", help="- to read the plugin options block from stdin")
     p.add_argument("--date", help="YYYY-MM-DD, default today")
 
     args = parser.parse_args(argv)
@@ -1605,8 +1608,12 @@ def main(argv: list[str] | None = None) -> int:
             out = Path(args.out)
             if out.exists():
                 raise SddError(f"{out} already exists; refusing to overwrite")
-            org = args.org if args.org is not None else _options(args)["organization"]
-            text = new_document(args.title, args.slug, args.kind, args.author, org,
+            options = _options(args)
+            org = args.org if args.org is not None else options["organization"]
+            author = args.author or options["author"]
+            if not author:
+                raise SddError("no author: pass --author or set the author option")
+            text = new_document(args.title, args.slug, args.kind, author, org,
                                 _csv(args.tags), _csv(args.links), args.date or today)
             out.parent.mkdir(parents=True, exist_ok=True)
             _write(str(out), text)
@@ -1676,7 +1683,7 @@ def main(argv: list[str] | None = None) -> int:
             _print_json(page_changes(_read(args.page), _read(args.file)))
         elif args.command == "release":
             text = _read(args.file)
-            author = args.author or str(parse_front_matter(text).get("author", ""))
+            author = args.author or _options(args)["author"] or str(parse_front_matter(text).get("author", ""))
             text, info = release(text, args.reason, author, args.date or today)
             _write(args.file, text)
             _print_json(info)

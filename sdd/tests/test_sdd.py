@@ -85,6 +85,24 @@ class NewTests(unittest.TestCase):
             "--date", "2026-10-06", "--out", out, *extra, stdin=stdin,
         )
 
+    def test_new_takes_the_author_from_the_options(self):
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "a.md"
+            r = run_cli("new", "--title", "T", "--slug", "t", "--kind", "new", "--options", "-",
+                        "--date", "2026-10-13", "--out", out, stdin="author=Ada Lovelace\n")
+            self.assertEqual(r.returncode, 0, r.stderr)
+            text = out.read_text(encoding="utf-8")
+            self.assertEqual(sdd().parse_front_matter(text)["author"], "Ada Lovelace")
+            self.assertEqual(sdd().revision_rows(text)[0][0], "Ada Lovelace")
+
+    def test_new_without_an_author_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "a.md"
+            r = run_cli("new", "--title", "T", "--slug", "t", "--kind", "new", "--out", out)
+            self.assertEqual(r.returncode, 2)
+            self.assertIn("author", r.stderr)
+            self.assertFalse(out.exists())
+
     def test_new_creates_all_sections(self):
         with tempfile.TemporaryDirectory() as d:
             out = Path(d) / "docs" / "sdd" / "preview-envs.md"
@@ -470,6 +488,25 @@ class OptionsTests(unittest.TestCase):
         r = run_cli("render", FIX / "full.md")
         self.assertIn("## 1.6 Requirements", r.stdout)
 
+    def test_author_option(self):
+        self.assertEqual(sdd().load_options("")["author"], "")
+        s = sdd().load_options("author=Ada Lovelace\nauthor_x=1\n")
+        self.assertEqual(s["author"], "Ada Lovelace")
+        self.assertEqual(s["warnings"], ["unknown option 'author_x' is ignored"])
+
+    def test_every_option_is_declared_and_passed_by_every_skill(self):
+        keys = set(sdd().OPTION_KEYS)
+        declared = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))["userConfig"]
+        self.assertEqual(set(declared), keys)
+        for skill in sorted((ROOT / "skills").glob("*/SKILL.md")):
+            block = re.findall(r"^(\w+)=\$\{user_config\.(\w+)\}$", skill.read_text(encoding="utf-8"), flags=re.M)
+            self.assertEqual({k for k, _ in block}, keys, skill.parent.name)
+            self.assertTrue(all(k == v for k, v in block), skill.parent.name)
+
+    def test_no_procedure_reads_the_git_identity(self):
+        for path in [ROOT / "README.md", *sorted((ROOT / "core").glob("*.md")), *sorted((ROOT / "skills").glob("*/SKILL.md"))]:
+            self.assertFalse("git config" in path.read_text(encoding="utf-8"), path.name)
+
     def test_helper_reads_no_settings_file(self):
         source = SCRIPT.read_text(encoding="utf-8")
         self.assertNotIn("CLAUDE_CONFIG_DIR", source)
@@ -782,6 +819,19 @@ class OriginalDocumentTests(unittest.TestCase):
 
 
 class ReleaseTests(unittest.TestCase):
+    def test_release_cli_author_order(self):
+        with tempfile.TemporaryDirectory() as d:
+            for extra, stdin, want in [
+                ((), None, "eeeemune"),
+                (("--options", "-"), "author=Ada Lovelace\n", "Ada Lovelace"),
+                (("--author", "Grace Hopper", "--options", "-"), "author=Ada Lovelace\n", "Grace Hopper"),
+            ]:
+                path = Path(d) / "sdd.md"
+                path.write_text(read("full.md"), encoding="utf-8")
+                r = run_cli("release", path, "--reason", "R", "--date", "2026-10-13", *extra, stdin=stdin)
+                self.assertEqual(r.returncode, 0, r.stderr)
+                self.assertEqual(sdd().revision_rows(path.read_text(encoding="utf-8"))[-1][0], want)
+
     def test_release_versions(self):
         src = sdd().set_front_matter(read("full.md"), {"version": "0.4"})
         out, info = sdd().release(src, reason="First published version", author="eeeemune", date="2026-10-07")
