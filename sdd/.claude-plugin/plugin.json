@@ -1,7 +1,7 @@
 {
   "name": "sdd-planner",
   "displayName": "SDD Planner",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Plan software with Software Design Descriptions (IEEE 1016): write one section at a time, review on a claude.ai page, publish with optional Notion sync",
   "author": {
     "name": "eeeemune",

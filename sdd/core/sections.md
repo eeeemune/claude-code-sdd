@@ -159,7 +159,7 @@ Addresses: where each part runs, how environments are removed, and the cap (infr
   1. what the diagram shows (the boxes and the arrows);
   2. what the text adds that the diagram can't: limits, timings, what happens on failure;
   3. which requirements it implements and which decisions shaped it.
-- **Drafts from:** 1.2, 1.6, 2.1, 2.2, the viewpoint's block in `viewpoints.md`, repo files (manifests, Helm charts, Terraform, CI workflows), and for kind existing or change, read-only cluster and AWS state.
+- **Drafts from:** 1.2, 1.6, 2.1, 2.2, the viewpoint's block in `viewpoints.md`, repo files (manifests, Helm charts, Terraform, CI workflows), and for kind existing or change, what runs today as the "What runs today" rule in `rules.md` says: the repo's deploy configuration, or what the user tells you.
 - **Choice type:** one turn per view. When there is a real design alternative (namespace per PR or vcluster per PR), Draft A and Draft B are those alternatives and the pick becomes a proposed ADR. When there is none, Draft B is a simpler or a more detailed version of A, and no ADR is added.
 - **Record format** (one per view, numbered V1, V2 and so on):
 

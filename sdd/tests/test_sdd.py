@@ -507,6 +507,11 @@ class OptionsTests(unittest.TestCase):
         for path in [ROOT / "README.md", *sorted((ROOT / "core").glob("*.md")), *sorted((ROOT / "skills").glob("*/SKILL.md"))]:
             self.assertFalse("git config" in path.read_text(encoding="utf-8"), path.name)
 
+    def test_no_procedure_reads_cloud_state(self):
+        for path in [ROOT / "README.md", *sorted((ROOT / "core").glob("*.md")), *sorted((ROOT / "skills").glob("*/SKILL.md"))]:
+            text = path.read_text(encoding="utf-8")
+            self.assertIsNone(re.search(r"(?i)\b(cluster|aws|cloud)\b[\w ]{0,12}\bstate\b", text), path.name)
+
     def test_helper_reads_no_settings_file(self):
         source = SCRIPT.read_text(encoding="utf-8")
         self.assertNotIn("CLAUDE_CONFIG_DIR", source)
