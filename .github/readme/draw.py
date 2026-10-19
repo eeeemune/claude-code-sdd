@@ -1,6 +1,15 @@
 """Draw the README graphics as light and dark SVGs.
 
 Usage: python3 .github/readme/draw.py   (writes the SVGs next to this script)
+
+The plugin's own README (sdd/README.md, which the directory listing shows) uses PNG
+copies of the light SVGs in sdd/docs/: stop-iterating.png, stop-pressing-enter.png and
+how-it-works.png. After changing a graphic, screenshot each light SVG at 2x with a
+transparent background (Chrome: --headless=new --force-device-scale-factor=2
+--default-background-color=00000000) and replace the PNG.
+
+icon.svg here is the source of the plugin's listing icon, sdd/icon.png: a 512x512
+screenshot of it at 1x with the same transparent background.
 """
 import html
 import pathlib

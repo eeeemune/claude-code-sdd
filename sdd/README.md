@@ -1,6 +1,32 @@
 # SDD Planner: Software Design Descriptions in Claude Code
 
-`sdd-planner` helps you write a Software Design Description (IEEE 1016, using the [jam01 SDD template](https://github.com/jam01/SDD-Template)) one section at a time, with Claude as the guide. Each section starts with a short card on what it is and why it matters. Claude then drafts two or three concrete options from your description and your repo, and you pick one. Every requirement gets an acceptance check, every design view names the requirements it implements, and every design choice becomes a decision record, so you end up with a spec you can build against. The SDD is a plain markdown file in your repo. Notion sync is optional.
+**Stop iterating. Stop pressing Enter.** SDD Planner settles the design before the code. You make each call in a Software Design Description, Claude drafts the options, and every requirement ends with a verification you can run.
+
+## Stop iterating
+
+You find out what you wanted one round at a time. Each correction is a requirement you could have written down first.
+
+![Before: 4 corrections, 4 human checks. After: 4 requirements written once, R1 to R4, each with a verification you can run, such as curl /healthz giving 200.](docs/stop-iterating.png)
+
+Build against the list, and you are done when the four verifications pass. The linter flags a requirement with no verification, a requirement no design view covers, and words like "fast" in a sentence with no number. The full SDD is the [worked example](https://github.com/eeeemune/claude-code-sdd/blob/main/sdd/examples/preview-envs.md).
+
+## Stop pressing Enter
+
+Claude shows a plan, asks "Proceed?", and you press Enter on something you skimmed. When it breaks later, you do not know which choice broke it.
+
+![Before: one plan, one key, approved without reading. After: you make each call: a card for each section, 2 or 3 drafts to pick from, a decision record for each choice, and a Check yourself question on each part.](docs/stop-pressing-enter.png)
+
+## How it works
+
+![1. Write: pick one of 2 or 3 drafts, one section per turn. 2. Review: approve each part or mark it Needs changes; Claude fixes it and marks it Re-check. 3. Publish: lint, bump the version, sync to Notion if it is on.](docs/how-it-works.png)
+
+The SDD follows IEEE 1016, using the [jam01 SDD template](https://github.com/jam01/SDD-Template), and it is a plain markdown file in your repo. Every design view names the requirements it implements. Notion sync is optional.
+
+| Command | What it does |
+|---------|--------------|
+| `/sdd-planner:write` | Starts a new SDD or resumes a draft, one section per turn: the card, two or three drafts to pick from, then the pick is written to the file. |
+| `/sdd-planner:review` | Reviews the SDD on a private claude.ai review page: plain-language notes, a diagram walk-through, Claude's check of each part, Approve or Needs changes, comments and suggested edits. Run it again and Claude acts on the feedback. `/sdd-planner:review walk` reviews in the terminal; `/sdd-planner:review notion` acts on comments on the Notion page. |
+| `/sdd-planner:publish` | Lints the SDD, bumps its version (the first publish is 1.0), adds a Revision History row, and, when Notion is on, syncs the page and reads it back to verify it. |
 
 ## Demo
 
@@ -10,20 +36,14 @@ This plugin was designed with itself. Below is the review page for the SDD of it
 
 ## Install
 
+Search for **SDD Planner** in Anthropic's plugin directory: run `/plugin directory` in Claude Code, or open Customize > Plugins > Discover on claude.ai, and the plugin reaches Claude Code the next time you start a session. Or add it from GitHub:
+
 ```bash
 claude plugin marketplace add eeeemune/claude-code-sdd
 claude plugin install sdd-planner@claude-code-sdd
 ```
 
 **Requires:** Claude Code, and Python 3.9 or newer as `python3` (macOS includes it). The review page also needs Claude Code's claude.ai Artifact tools. Tested on macOS. The commands are built for Claude Code: they run a local Python helper and write files, which claude.ai chat and Cowork may not allow.
-
-## Commands
-
-| Command | What it does |
-|---------|--------------|
-| `/sdd-planner:write` | Starts a new SDD or resumes a draft, one section per turn: the card, two or three drafts to pick from, then the pick is written to the file. |
-| `/sdd-planner:review` | Reviews the SDD on a private claude.ai review page: plain-language notes, a diagram walk-through, Claude's check of each part, Approve or Needs changes, comments and suggested edits. Run it again and Claude acts on the feedback. `/sdd-planner:review walk` reviews in the terminal; `/sdd-planner:review notion` acts on comments on the Notion page. |
-| `/sdd-planner:publish` | Lints the SDD, bumps its version (the first publish is 1.0), adds a Revision History row, and, when Notion is on, syncs the page and reads it back to verify it. |
 
 ## What it runs and sends
 
